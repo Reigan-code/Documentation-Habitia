@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HABITIA — Guía Definitiva: flujos, capas, BD y el porqué</title>
+<style>
+:root{--rosa:#d36a9b;--morado:#8b5fc0;--azul:#5a7fd6;--verde:#43a47a;--oro:#d9a441;--fondo:#fffafc;--texto:#302642}
+*{box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;margin:0;background:var(--fondo);color:var(--texto);line-height:1.55}
+header{background:linear-gradient(120deg,#7b2d5e,#8b5fc0);color:#fff;padding:20px 26px;position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+header h1{margin:0;font-size:22px}header p{margin:4px 0 0;opacity:.92;font-size:12px}
+nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px;background:#fff;border-bottom:1px solid #f0dce8;position:sticky;top:72px;z-index:39;max-height:92px;overflow:auto}
+nav button{border:none;background:#f6edf4;color:#7b2d5e;padding:7px 12px;border-radius:18px;cursor:pointer;font-size:11px;font-weight:700;transition:.25s;white-space:nowrap}
+nav button:hover,nav button.act{background:#7b2d5e;color:#fff;transform:translateY(-2px)}
+main{max-width:1220px;margin:auto;padding:20px}
+.seccion{display:none;animation:entrar .5s ease}.seccion.act{display:block}
+@keyframes entrar{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+h2{color:#7b2d5e;border-bottom:3px solid #f3c6d9;padding-bottom:6px;font-size:22px}
+h3{color:#6d3b8f;font-size:16px;margin:18px 0 6px}
+p,li{font-size:13px}
+.codebox{background:#2b2340;color:#f8d9e9;border-radius:12px;padding:12px 14px;font-family:Consolas,monospace;font-size:11px;line-height:1.5;overflow:auto;white-space:pre}
+.codebox .hi{color:#ffd166}.codebox .hi2{color:#8be9c0}.codebox .hi3{color:#ff9ecd}
+code{background:#f5eef5;color:#7b2d5e;padding:2px 5px;border-radius:4px;font-size:11px}
+.card{background:#fff;border:1px solid #f0dce8;border-left:5px solid var(--rosa);border-radius:12px;padding:13px 15px;margin:9px 0;transition:.25s}
+.card:hover{transform:translateX(5px)}
+.card.azul{border-left-color:var(--azul)}.card.verde{border-left-color:var(--verde)}.card.morado{border-left-color:var(--morado)}.card.oro{border-left-color:var(--oro)}
+.card b{color:#7b2d5e}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0;background:#fff;border-radius:10px;overflow:hidden}
+th{background:#7b2d5e;color:#fff;padding:9px;text-align:left}td{padding:8px 9px;border-bottom:1px solid #f2e6ee}
+tr:nth-child(even) td{background:#fdf8fb}
+.viaje{display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:#fff;border:2px dashed #f0c9dd;border-radius:16px;padding:14px;margin:12px 0}
+.parada{border:2px solid var(--rosa);border-radius:11px;padding:9px 12px;background:#fff;font-size:11px;min-width:95px;text-align:center;cursor:pointer;transition:.3s;animation:latir 3.4s ease-in-out infinite}
+.parada:nth-child(3){animation-delay:.2s}.parada:nth-child(5){animation-delay:.4s}.parada:nth-child(7){animation-delay:.6s}.parada:nth-child(9){animation-delay:.8s}.parada:nth-child(11){animation-delay:1s}.parada:nth-child(13){animation-delay:1.2s}.parada:nth-child(15){animation-delay:1.4s}
+.parada:hover,.parada.act{background:#7b2d5e;color:#fff;transform:scale(1.08);box-shadow:0 0 0 5px rgba(211,106,155,.22)}
+@keyframes latir{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.flecha{color:var(--rosa);font-weight:900;font-size:16px;animation:mover 1.3s linear infinite}
+@keyframes mover{0%,100%{opacity:.3}50%{opacity:1;transform:translateX(4px)}}
+button.accion{background:#7b2d5e;color:#fff;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;font-size:13px;margin:3px 5px 10px 0}
+button.accion.alt{background:var(--morado)}
+.detalle{background:#fff;border-left:5px solid var(--morado);border-radius:12px;padding:15px;min-height:90px;font-size:13px;margin-top:8px;animation:entrar .3s}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tabs button{background:#f6edf4;border:none;color:#7b2d5e;padding:8px 12px;border-radius:16px;cursor:pointer;font-size:11px;font-weight:700}
+.tabs button.act{background:#7b2d5e;color:#fff}
+.proceso{display:none}.proceso.act{display:block;animation:entrar .4s}
+.mini{font-size:11px;color:#8d7d96}
+.pie{text-align:center;font-size:11px;color:#a08fa8;padding:28px 0;border-top:1px solid #eee;margin-top:30px}
+.paso-titulo{font-size:15px;font-weight:800;color:#7b2d5e;margin-bottom:5px}
+</style>
+</head>
+<body>
+<header>
+ <h1>📚 HABITIA — Guía Definitiva (flujos reales, explicados como persona)</h1>
+ <p>Mantené <b>▶ Contar la historia</b> y tocá cada parada. Ahora está en TODOS los procesos, con quién es quién, diagramas y el porqué de cada cambio.</p>
+</header>
+<nav>
+ <button class="act" data-s="flujos">🎢 1. Flujos</button>
+ <button data-s="glosario">📖 2. UseCase / DTO / Impl</button>
+ <button data-s="diagramas">🗺️ 3. Diagramas</button>
+ <button data-s="bd">🗄️ 4. Base de datos</button>
+ <button data-s="quien">👥 5. Quién es quién</button>
+ <button data-s="porque">❓ 6. El porqué</button>
+ <button data-s="pantallas">🖥️ 7. Pantallas</button>
+ <button data-s="cambios">🛠️ 8. Cómo hacer cambios</button>
+ <button data-s="hiper">🔬 9. Nivel cirujano</button>
+</nav>
+
+<main>
+
+<!-- ========== 1 FLUJOS ========== -->
+<section class="seccion act" id="flujos">
+<h2>1. Todos los procesos de Habitia (modo historia)</h2>
+<p>Elegí el proceso y dale a <b>▶ Contar la historia</b>. Cada parada se prende y te explica <b>qué método se llama, en qué archivo y cómo se conecta al backend</b>.</p>
+<div class="tabs" id="tabsProcesos">
+ <button class="act" data-p="tarea">✅ Crear tarea</button>
+ <button data-p="habito">🔥 Completar hábito</button>
+ <button data-p="comida">🍽️ Crear comida</button>
+ <button data-p="compra">🛒 Lista de compras</button>
+ <button data-p="recordatorio">🔔 Recordatorio</button>
+ <button data-p="diario">📖 Diario</button>
+ <button data-p="login">🔐 Login</button>
+ <button data-p="tema">🎨 Cambiar tema</button>
+ <button data-p="haabi">🐾 Haabi crea todo</button>
+</div>
+
+<div id="proceso-tarea" class="proceso act">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Vos tocás</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 TaskScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 TasksViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📜 UseCase</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔌 TaskRepository</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">📦 Impl + TaskCreateDto</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">🔄 TaskMapper</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🌐 Ktor POST /Tasks</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">⚙️ Controller→Service→JPA→MySQL</div><div class="flecha">➜</div>
+ <div class="parada" data-i="9">📢 EventBus (si es Haabi)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="10">🔄 StateFlow → Vos</div>
+</div>
+<button class="accion" onclick="contar('tarea')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-tarea"><b>Elegí una parada o dale a ▶</b><br>Crear una tarea es el ejemplo clásico: tocas Crear, y la info viaja hasta MySQL y vuelve.</div>
+</div>
+
+<div id="proceso-habito" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Tocás el check</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 RitualCard (Home)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 HomeViewModel.toggleHabit</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 HabitRepository.completeHabit</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 ApiHabitRepositoryImpl</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /HabitCompletions</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">⚙️ Service calcula streak</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🔄 refresh() → StateFlow</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">🔥 Racha se actualiza</div>
+</div>
+<button class="accion" onclick="contar('habito')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-habito"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-comida" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Guardás comida</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 FoodScreen editor</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 FoodViewModel.addMeal</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 MealRepository.addMeal</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 Impl + MealsCreateDto</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /Meals</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">📎 POST /MealIngredients por cada ing.</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">⚙️ JPA → MySQL</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">🔄 cache → StateFlow → pantalla</div>
+</div>
+<button class="accion" onclick="contar('comida')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-comida"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-compra" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Agregás ítem</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 FoodScreen (Compras)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 FoodViewModel.addShoppingItem</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 ShoppingRepository.addItem</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 ShoppingItemCreateDto</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /ShoppingLists/{id}/items</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">⚙️ InterpreteDeIngredientes</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🗄️ item_date + source_meal_type</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">🔄 vista Por día / Por alimento</div>
+</div>
+<button class="accion" onclick="contar('compra')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-compra"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-recordatorio" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Creás alerta</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 RemindersScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 RemindersViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 ReminderRepository.addReminder</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 ReminderCreateDto (joinDateTime)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /Reminders</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">⚙️ Service guarda fecha/hora</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🔔 getUpcomingReminder() → Home</div>
+</div>
+<button class="accion" onclick="contar('recordatorio')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-recordatorio"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-diario" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Escribís</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 DiaryScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 DiaryViewModel.refresh/add</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 DiaryRepository</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 DiaryEntryCreateDto</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /DiaryEntries</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">🗄️ userId + entryDate + text</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🔄 entries StateFlow → libro</div>
+</div>
+<button class="accion" onclick="contar('diario')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-diario"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-login" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Ponés clave</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 LoginScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 AuthViewModel.login</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 AuthRepository.login</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📦 LoginRequestDto</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 POST /auth/login</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">🔐 JwtService firma HS256 (24h)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">👤 GET /Users/email → userId</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">💾 SessionManager → DataStore</div><div class="flecha">➜</div>
+ <div class="parada" data-i="9">🏠 App entra al Home</div>
+</div>
+<button class="accion" onclick="contar('login')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-login"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-tema" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">👆 Elegís paleta</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 AppearanceScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧠 UserMenuViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📜 UpdateThemeUseCase</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔌 UserPreferencesRepository</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">💾 DataStore (NO backend)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">🎨 glassTokens() reacciona</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">🪟 Todo el vidrio cambia</div>
+</div>
+<button class="accion" onclick="contar('tema')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-tema"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="proceso-haabi" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">💬 Escribís a Haabi</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 HaabiScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🌐 ApiClient.haabiChat</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🤖 Gemini 2.5-flash</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🎯 functionCall (7 tools)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">⚙️ HaabiActionsImpl</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">📦 repos → backend → MySQL</div><div class="flecha">➜</div>
+ <div class="parada" data-i="7">📢 HaabiEventBus.emit</div><div class="flecha">➜</div>
+ <div class="parada" data-i="8">🔔 App: refresh + pestaña + notif.</div><div class="flecha">➜</div>
+ <div class="parada" data-i="9">🔄 StateFlow → todo en pantalla</div>
+</div>
+<button class="accion" onclick="contar('haabi')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle-haabi"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+</section>
+
+<!-- ========== 2 GLOSARIO ========== -->
+<section class="seccion" id="glosario">
+<h2>2. ¿Qué es cada cosa? (glosario con la analogía de la cocina)</h2>
+<div class="card"><div class="paso-titulo">📜 UseCase — "El que dice QUÉ hacer, no CÓMO"</div>
+Es una clase con un método <code>operator fun invoke()</code>. Ejemplo real: <code>GetTodayTasksUseCase</code> → <code>repository.getTodayTasks()</code>. Está en <code>Domain/usecase/</code>. No sabe de HTTP ni de MySQL: solo llama a una interfaz. Por eso podés cambiar el backend y el use case ni se entera. Los 7: CompleteTask, GetHabits, GetThemePreference, GetTodayTasks, GetUpcomingReminder, GetWeeklyMeals, UpdateTheme.</div>
+<div class="card azul"><div class="paso-titulo">🔌 Interface (Repository) — "El contrato"</div>
+Ejemplo: <code>TaskRepository</code> declara <code>getTasks(): Flow</code>, <code>addTask(task)</code>, <code>completeTask(id)</code>, <code>updateTask</code>, <code>deleteTask</code>. Vive en <code>Domain/repository/</code>. Es la promesa: "esto存在, sin importar cómo se guarda". Presentation y Data se ponen de acuerdo acá.</div>
+<div class="card morado"><div class="paso-titulo">📦 Impl — "El empleado que hace el trabajo"</div>
+<code>ApiTaskRepositoryImpl</code> implementa la interfaz. Usa el <code>HttpClient</code> de ApiClient, construye la URL, pone el Bearer token y llama POST /Tasks. Está en <code>Data/repository/</code>. Si mañana cambiás de backend, solo se cambia este archivo.</div>
+<div class="card oro"><div class="paso-titulo">✉️ DTO — "El sobre donde viaja la info"</div>
+<code>TaskCreateDto(title, description, dueDate, priority)</code> es lo que se serializa a JSON. Los de entrada terminan en Request/Create; los de salida en Response. Están en <code>Data/remote/dto/</code>. El backend tiene sus propios DTOs con el mismo nombre.</div>
+<div class="card verde"><div class="paso-titulo">🔄 Mapper — "El traductor"</div>
+<code>TaskMapper.toDomain(dto)</code> convierte el JSON que vuelve en tu modelo <code>Task</code>. Está en <code>Data/remote/mapper/</code>. Lo mismo hacen HabitMapper, MealMapper, ReminderMapper, CalendarShoppingMapper.</div>
+<div class="card"><div class="paso-titulo">🌐 ApiClient — "El mozo con el DNI"</div>
+Crea el HttpClient (Ktor) UNA sola vez, resuelve la IP del backend, guarda el API key de Gemini y define <code>haabiChat()</code> + <code>haabiTools()</code>. Está en <code>Data/remote/api/ApiClient.kt</code>.</div>
+<div class="card azul"><div class="paso-titulo">🧠 ViewModel — "El clan que recuerda el estado"</div>
+Guarda el estado de la pantalla en <code>StateFlow</code>. La UI hace <code>collectAsState()</code> y se repinta sola. Ejemplo: <code>HomeViewModel</code> junta 4 use cases + 3 repositorios para calcular el progreso.</div>
+<div class="card morado"><div class="paso-titulo">🔧 Koin (di) — "El que reparte herramientas antes de la obra"</div>
+<code>startKoin { modules(appModule) }</code> en MainActivity. <code>single</code> = una instancia (repos, sesión); <code>factory</code> = una nueva cada vez (ViewModels, use cases). NO conecta al backend: solo entrega los Impl ya hechos.</div>
+<div class="card oro"><div class="paso-titulo">🪟 Haze — "El vidrio de la ventana"</div>
+<code>hazeSource(hazeState)</code> en la capa de fondo + <code>hazeEffect()</code> en la de contenido. El truco: son <b>hermanas</b>, no una dentro de otra, porque Haze 1.2.x excluye effects descendientes. <code>backgroundColor</code> en el HazeStyle es obligatorio (si no, crashea en API 31+).</div>
+</section>
+
+<!-- ========== 3 DIAGRAMAS ========== -->
+<section class="seccion" id="diagramas">
+<h2>3. Diagramas dinámicos: Frontend y Backend</h2>
+<div class="tabs"><button class="act" data-d="front">📱 Frontend KMP</button><button data-d="back">⚙️ Backend hexagonal</button></div>
+<div id="diag-front" class="codebox">
+<span class="hi">╔══════════════════════ APP (KMP) ══════════════════════╗</span>
+<span class="hi2">🎨 Presentation</span>  ← vos tocás acá
+   │  collectAsState() / StateFlow
+   ▼
+<span class="hi2">🧠 Domain</span>  ← modelos + interfaces + 7 use cases
+   ▲                       ▲
+   │ implementa            │ implementa
+<span class="hi3">📦 Data</span>  ────────┘         │
+   │  ApiClient (Ktor) + DTOs + Mappers + Gemini
+   ▼
+<span class="hi">🌐 HTTP / JSON</span>
+╚══════════════════════════════════════════════════════╝
+
+<span class="hi">🔧 di (Koin)</span> reparte: Settings, SessionManager, HttpClient, 11 repos, 7 use cases, 8 VMs
+<span class="hi">🎨 Core</span> da: tema, vidrio (Glass), 16 componentes, navegación, UiConfig
+<span class="hi">📢 Core/events</span> = HaabiEventBus avisa a todo el sistema</div>
+<div id="diag-back" class="codebox" style="display:none">
+<span class="hi">╔════════════ BACKEND (Spring Boot hexagonal) ═══════════╗</span>
+<span class="hi2">🔐 auth/</span> → JwtAuthenticationFilter valida el Bearer (401 si no)
+   │
+   ▼
+<span class="hi2">⚙️ modules/&lt;módulo&gt;/infrastructure/Controller/</span>  ← puerta HTTP
+   │  DTO de entrada
+   ▼
+<span class="hi2">application/service/</span>  ← reglas de negocio + @Transactional
+   │  entidad de dominio
+   ▼
+<span class="hi2">domain/model/</span>  ← la fila de la tabla
+   │
+   ▼
+<span class="hi3">infrastructure/persistence/</span>  ← JpaRepository → SQL
+   │
+   ▼
+<span class="hi">🗄️ MySQL "habitia"</span>
+
+Módulos: task · habit · reminder · meal · shopping · calendar · diary · user · catalog
+<span class="hi">shared/</span>: User + 9 enums lo usa todo el mundo</div>
+</section>
+
+<!-- ========== 4 BD ========== -->
+<section class="seccion" id="bd">
+<h2>4. Diagrama de Base de datos (11 tablas)</h2>
+<p>Tocá una tabla para ver para qué sirve y quién la dueño.</p>
+<div class="codebox">
+<span class="hi">👤 Users</span> ──┬── <span class="hi2">Tasks</span> ── <span class="hi2">Task_Categories</span>
+                 ├── <span class="hi2">Habits</span> ── <span class="hi2">Habit_complet</span> (rachas)
+                 ├── <span class="hi2">Reminders</span>
+                 ├── <span class="hi2">Meals</span> ── <span class="hi2">Meal_Ingredients</span>
+                 ├── <span class="hi2">Shopping_Lists</span> ── <span class="hi2">Shopping_Items</span> (día + comida + categoría)
+                 ├── <span class="hi2">Calendar_Events</span>  (lo que agenda Haabi)
+                 ├── <span class="hi2">DiaryEntries</span>
+                 └── <span class="hi3">Catalog_Ingredients</span> (48 ingredientes sembrados)</div>
+<table>
+<tr><th>Tabla</th><th>Qué guarda</th><th>Dueño</th></tr>
+<tr><td>Users</td><td>email único, password cifrado, nombre, cumple, teléfono</td><td>shared / user</td></tr>
+<tr><td>Tasks / Task_Categories</td><td>tareas + categorías editables (Hogar, Compras…)</td><td>task / catalog</td></tr>
+<tr><td>Habits / Habit_complet</td><td>hábitos y sus checks por fecha (de ahí sale el streak)</td><td>habit</td></tr>
+<tr><td>Reminders</td><td>alertas con reminderDate y repeat</td><td>reminder</td></tr>
+<tr><td>Meals / Meal_Ingredients</td><td>comidas por día/tipo + ingredientes detallados</td><td>meal</td></tr>
+<tr><td>Shopping_Lists / Shopping_Items</td><td>lista + ítems con item_date, source_meal_type, source_meal_name</td><td>shopping</td></tr>
+<tr><td>Calendar_Events</td><td>eventos que agenda Haabi (09:00–10:00)</td><td>calendar</td></tr>
+<tr><td>DiaryEntries</td><td>entradas por fecha</td><td>diary</td></tr>
+<tr><td>Catalog_Ingredients</td><td>catálogo de 48 ingredientes por categoría</td><td>catalog</td></tr>
+</table>
+<div class="card verde"><b>Dato curioso</b><br>El módulo Meal tiene una clase <code>InterpreteDeIngredientes</code> que lee "200 g de arroz" y separa cantidad, unidad y nombre. Gracias a eso la lista de compras acepta texto libre sin romperse.</div>
+</section>
+
+<!-- ========== 5 QUIEN ES QUIEN ========== -->
+<section class="seccion" id="quien">
+<h2>5. Quién es quién, de inicio a fin</h2>
+<div class="card"><b>1. MainActivity (Android)</b><br>Enciende el teléfono: permiso de notificaciones, Koin, y muestra App().</div>
+<div class="card azul"><b>2. App.kt</b><br>El director: resuelve la IP, restaura sesión, escucha HaabiEventBus, decide pantalla con Crossfade y coloca la isla + Haabi.</div>
+<div class="card morado"><b>3. Screen (15 pantallas)</b><br>Lo que ves y tocás. Solo llama al ViewModel y muestra su StateFlow.</div>
+<div class="card"><b>4. ViewModel (8)</b><br>Clan que recuerda el estado. Ej: HomeViewModel mezcla 4 use cases + 3 repos para el progreso.</div>
+<div class="card oro"><b>5. UseCase (7)</b><br>Reglas simples: "trae las tareas de hoy", "marca completa", "trae el próximo recordatorio".</div>
+<div class="card azul"><b>6. Repository interface (12)</b><br>El contrato entre Domain y Data.</div>
+<div class="card morado"><b>7. Repository Impl (11)</b><br>El que realmente habla por HTTP con el backend.</div>
+<div class="card verde"><b>8. DTO + Mapper</b><br>El sobre que viaja y el traductor que lo convierte en modelo de dominio.</div>
+<div class="card"><b>9. ApiClient (Ktor)</b><br>El mozo: HttpClient, Bearer token, IP automática y Gemini.</div>
+<div class="card azul"><b>10. Backend</b><br>Controller → Service → Entity → JPA → MySQL.</div>
+<div class="card oro"><b>11. HaabiEventBus + StateFlow</b><br>El aviso y el repinte automático. Todo vuelve al usuario.</div>
+</section>
+
+<!-- ========== 6 PORQUE ========== -->
+<section class="seccion" id="porque">
+<h2>6. El ¿por qué? de todos los cambios</h2>
+<p>Esto es lo que aprendimos a lo largo de los 41 cortes. Cada cambio tiene una razón:</p>
+<table>
+<tr><th>Cambio</th><th>¿Por qué?</th></tr>
+<tr><td>Wiring manual → Koin (di)</td><td>El profesor pidió Modules + SettingProvider. Koin reparte dependencias; NO conecta al backend (eso lo hace Ktor).</td></tr>
+<tr><td>NavigationBar → Row propio (isla)</td><td>Material3 imponía 80dp y no se podía achicar. Ahora altura controlada desde UiConfig.</td></tr>
+<tr><td>Haze: 2 cajas hermanas</td><td>Haze 1.2.x excluye effects descendientes del source por zIndex. Como hermanas, el blur sí funciona.</td></tr>
+<tr><td>HazeStyle con backgroundColor</td><td>Es obligatorio en la ruta RenderEffect; sin él crashea en API 31+.</td></tr>
+<tr><td>BASE_URL auto-detectada</td><td>Antes un flag USE_DEVICE obligaba a recompilar al cambiar de Wi-Fi. Ahora prueba 4 IPs.</td></tr>
+<tr><td>JWT 15 min → 24 h</td><td>El usuario se desconectaba cada 15 minutos. Ahora la sesión dura un día.</td></tr>
+<tr><td>SessionManager + DataStore</td><td>Antes se perdía el login al cerrar la app. Ahora se restaura.</td></tr>
+<tr><td>HaabiAssistant eliminado</td><td>Nunca pasaba <code>actions</code> a Gemini → no ejecutaba nada. Se quedó solo el camino nativo con function calling.</td></tr>
+<tr><td>Modelo gemini-3.1 → 2.5-flash</td><td>Function calling más confiable; el prompt se recortó a ~80 tokens para bajar latencia.</td></tr>
+<tr><td>HaabiActionsImpl = único puente</td><td>Si la IA quiere crear algo, debe pasar por los repos reales. Así se guarda en MySQL sí o sí.</td></tr>
+<tr><td>HaabiEventBus</td><td>Sin él, la UI no se enteraba de lo que Haabi creaba. Ahora refresca, cambia pestaña y notifica.</td></tr>
+<tr><td>InterpreteDeIngredientes tolerante</td><td>"Pollo" sin cantidad daba 400 → 403. Ahora asume 1 unidad.</td></tr>
+<tr><td>Categorías y catálogo a MySQL</td><td>Estaban en memoria y se perdían. Ahora son tablas con seed.</td></tr>
+<tr><td>Backend hexagonal</td><td>Estaba en carpetas planas. Ahora cada módulo tiene domain/application/infrastructure; más orden y menos conflictos.</td></tr>
+<tr><td>web/ → Controller/</td><td>Lo pidió el profesor en su plantilla; se renombró sin romper nada.</td></tr>
+<tr><td>Comentarios cortos estilo "sino pues…"</td><td>Para que el código se lea como lo pediste: breve, claro, hablado.</td></tr>
+<tr><td>DoD + 12 Queries Azure DevOps</td><td>Para que el equipo sepa cuándo algo está realmente Done y cómo auditarlo.</td></tr>
+<tr><td>Gradle: JAVA_HOME 21 + sin toolchain</td><td>Android Studio intentaba descargar Azul Zulu y el sync se colgaba. Ahora es estable.</td></tr>
+<tr><td>ZIP con staging de rutas cortas</td><td>El error 0x80010135 venía de rutas >260 chars con .dex. Ahora ruta máx 130.</td></tr>
+<tr><td>HTML narrado + PDF + Postman</td><td>Para que cualquier persona entienda el proyecto y pueda probarlo sin leer código.</td></tr>
+</table>
+</section>
+
+<!-- ========== 7 PANTALLAS ========== -->
+<section class="seccion" id="pantallas">
+<h2>7. Cada pantalla: qué hace, qué ViewModel usa y a qué backend llama</h2>
+<table>
+<tr><th>Pantalla</th><th>Función principal</th><th>ViewModel / use case</th><th>Conexión backend</th></tr>
+<tr><td>Splash / Welcome</td><td>Puerta de entrada y animación</td><td>—</td><td>ninguna</td></tr>
+<tr><td>Login / Register</td><td>Autenticarte</td><td>AuthViewModel</td><td>POST /auth/login, /auth/register</td></tr>
+<tr><td>Home</td><td>Saludo, progreso, rituales, racha, mascota</td><td>HomeViewModel + GetTodayTasks, GetHabits, GetUpcomingReminder</td><td>/Tasks, /Habits, /HabitCompletions, /Reminders</td></tr>
+<tr><td>TaskScreen</td><td>Tareas por categoría editable</td><td>TasksViewModel</td><td>/Tasks, /Catalogs/categories</td></tr>
+<tr><td>EisenhowerScreen</td><td>Matriz 2x2 + Kanban drag&drop</td><td>TasksViewModel.updateTask</td><td>PUT /Tasks</td></tr>
+<tr><td>PlannerScreen</td><td>Calendario semanal</td><td>PlannerViewModel</td><td>/CalendarEvents</td></tr>
+<tr><td>RemindersScreen</td><td>Alertas</td><td>RemindersViewModel</td><td>/Reminders</td></tr>
+<tr><td>FoodScreen</td><td>Menú, compras, catálogo, tutorial</td><td>FoodViewModel + GetWeeklyMeals</td><td>/Meals, /MealIngredients, /ShoppingLists, /Catalogs</td></tr>
+<tr><td>FocusScreen</td><td>Temporizador Pomodoro</td><td>FocusViewModel</td><td>local (sin backend)</td></tr>
+<tr><td>DiaryScreen</td><td>Diario libro</td><td>DiaryViewModel</td><td>/DiaryEntries</td></tr>
+<tr><td>HaabiScreen</td><td>Chat con IA, multi-chat, persona</td><td>HaabiActionsImpl + ApiClient</td><td>Gemini + TODOS los módulos</td></tr>
+<tr><td>MoreScreen</td><td>Menú de accesos</td><td>—</td><td>ninguna</td></tr>
+<tr><td>UserMenuScreen</td><td>Perfil real del JWT</td><td>UserMenuViewModel</td><td>/Users/{id}</td></tr>
+<tr><td>AppearanceScreen</td><td>Paletas, fuentes, oscuro, HEX</td><td>UpdateThemeUseCase</td><td>DataStore (no backend)</td></tr>
+<tr><td>GlassDiagnostic</td><td>Prueba visual del vidrio</td><td>—</td><td>ninguna</td></tr>
+</table>
+<div class="card verde"><b>¿Cómo se decide qué mostrar?</b><br><code>App.kt</code> tiene un <code>when (currentScreen)</code> con <code>Crossfade</code>: según la ruta que toques en la isla o en Haabi, hace un fundido y muestra esa pantalla. Es el semáforo de toda la app.</div>
+</section>
+
+<!-- ========== 8 CAMBIOS ========== -->
+<section class="seccion" id="cambios">
+<h2>8. 🛠️ Cómo hacer CUALQUIER cambio (modo historia, con rutas y métodos)</h2>
+<p>Elegí qué te piden cambiar y dale a <b>▶ Contar la historia</b>. Te digo <b>por dónde empezar, qué archivo tocar, qué método cambiar, y cómo se propaga el cambio hasta el usuario</b>. Todo con las rutas reales.</p>
+
+<div class="tabs" id="tabsCambios">
+ <button class="act" data-c="tamano">📏 Cambiar un tamaño</button>
+ <button data-c="color">🎨 Cambiar un color / tema</button>
+ <button data-c="mover">📦 Mover un componente</button>
+ <button data-c="endpoint">🌐 Agregar/cambiar endpoint</button>
+ <button data-c="prompt">🤖 Cambiar prompt de IA</button>
+ <button data-c="regla">📜 Cambiar una regla</button>
+ <button data-c="bd">🗄️ Cambiar la BD</button>
+ <button data-c="pantalla">🖥️ Agregar pantalla</button>
+ <button data-c="notif">🔔 Cambiar notificación</button>
+ <button data-c="texto">✏️ Cambiar un texto</button>
+</div>
+
+<div id="cambio-tamano" class="proceso act">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 Te piden: "más pequeño"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🗺️ UiConfig.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🎨 Componente lo lee</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔄 Compose recompone</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">👆 Vos lo ves</div>
+</div>
+<button class="accion" onclick="contar2('tamano')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-tamano"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-color" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambia el rosado"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🎨 Color.kt / Theme.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🪟 glassTokens()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🧱 16 componentes glass</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔄 Toda la app cambia</div>
+</div>
+<button class="accion" onclick="contar2('color')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-color"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-mover" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Mové esto de lugar"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🖥️ Screen donde vive</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📐 Modifier.align/offset</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🧭 App.kt (si es global)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">👆 Vos lo ves nuevo</div>
+</div>
+<button class="accion" onclick="contar2('mover')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-mover"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-endpoint" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Nuevo endpoint"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">⚙️ Backend Controller</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📦 DTO + Service</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📱 Front DTO + Mapper</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔌 Interface + Impl</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🧠 ViewModel + Screen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">✅ Probar en Postman</div>
+</div>
+<button class="accion" onclick="contar2('endpoint')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-endpoint"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-prompt" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Haabi debe…"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🌐 ApiClient.systemText</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🧰 haabiTools() si hay tool</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">⚙️ HaabiActionsImpl</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📢 EventBus → UI</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🤖 Probás en el chat</div>
+</div>
+<button class="accion" onclick="contar2('prompt')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-prompt"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-regla" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambia la regla"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📜 Domain/usecase (front)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">⚙️ application/service (back)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔌 Mismo contrato</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔄 UI no se toca</div>
+</div>
+<button class="accion" onclick="contar2('regla')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-regla"><b>Elegí una parada odale a ▶</b></div>
+</div>
+
+<div id="cambio-bd" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Agregá un campo"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🗄️ Backend domain/model</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📦 DTOs request/response</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔄 ddl-auto=update</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📱 Front model + DTO</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🔄 Mapper + Screen</div>
+</div>
+<button class="accion" onclick="contar2('bd')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-bd"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-pantalla" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Nueva sección"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🧭 HabitiaScreen (ruta)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🎨 Nuevo Screen.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🧠 ViewModel + StateFlow</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔌 Repos via di/Modules</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🧭 App.kt when()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="6">✅ Compilás y ves</div>
+</div>
+<button class="accion" onclick="contar2('pantalla')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-pantalla"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-notif" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambia la alerta"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📱 Data/notification</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🔔 AndroidLocalNotificationPlatform</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📢 HaabiEventBus → App.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">⚙️ scheduleForTask (backend)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🔕 Probás en la bandeja</div>
+</div>
+<button class="accion" onclick="contar2('notif')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-notif"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="cambio-texto" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambia el texto"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🖥️ Buscar en Screen.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📝 Editar literal</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🔄 Recomposición</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">👆 Vos lo ves</div>
+</div>
+<button class="accion" onclick="contar2('texto')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle2-texto"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<h3>🗺️ Mapa de seguimiento rápido (todos los módulos)</h3>
+<table>
+<tr><th>Si te piden…</th><th>Ruta exacta</th><th>Método / archivo clave</th></tr>
+<tr><td>Tamaño de isla o Haabi</td><td>Core/config/UiConfig.kt</td><td>IslandConfig / HaabiConfig</td></tr>
+<tr><td>Color del tema</td><td>Core/theme/Color.kt · Theme.kt</td><td>glassTokens()</td></tr>
+<tr><td>Vidrio / blur</td><td>Core/theme/Glass.kt</td><td>habitiaGlass() · habitiaAmbient()</td></tr>
+<tr><td>Mover Haabi</td><td>Core/components/HaabiCompanion.kt</td><td>detectDragGestures · mascotOffset</td></tr>
+<tr><td>Posición global</td><td>App.kt</td><td>Box raíz + zIndex + Alignment</td></tr>
+<tr><td>Un endpoint</td><td>Data/remote/api/ApiClient.kt + Data/remote/dto/</td><td>get()/post() + DTO</td></tr>
+<tr><td>Un repositorio</td><td>Data/repository/Api*RepositoryImpl.kt</td><td>implementa Domain/repository/*</td></tr>
+<tr><td>Una regla de negocio</td><td>Domain/usecase/ (front) · application/service/ (back)</td><td>invoke() / ServiceImpl</td></tr>
+<tr><td>Un modelo de dato</td><td>Domain/model/ + backend modules/*/domain/model/</td><td>data class / @Entity</td></tr>
+<tr><td>El prompt de IA</td><td>ApiClient.kt → systemText</td><td>haabiChat()</td></tr>
+<tr><td>Herramientas IA</td><td>ApiClient.haabiTools() + HaabiActionsImpl.kt</td><td>executeHaabiAction()</td></tr>
+<tr><td>Categorías</td><td>Data/repository/ApiTaskCategoryRepository.kt + CatalogController</td><td>/Catalogs/categories</td></tr>
+<tr><td>Catálogo ingredientes</td><td>ApiIngredientCatalogRepository.kt + CatalogController</td><td>/Catalogs/ingredients</td></tr>
+<tr><td>Notificación</td><td>Data/notification/ + App.kt + backend scheduleForTask()</td><td>showAlert() · emit()</td></tr>
+<tr><td>Inyección</td><td>di/Modules.kt · di/SettingProvider.kt</td><td>appModule · createSettings()</td></tr>
+<tr><td>Documentar</td><td>CAMBIOS.md + esta guía</td><td>// comentarios cortos</td></tr>
+</table>
+
+<div class="card verde"><b>Checklist final (siempre)</b><br>1️⃣ ¿Compila? <code>.\gradlew assembleDebug</code> + <code>.\mvnw.cmd clean compile</code><br>2️⃣ ¿Se ve? captura en el celular<br>3️⃣ ¿Se guarda? Postman / MySQL<br>4️⃣ ¿Sin errores? <code>adb logcat</code> sin FATAL<br>5️⃣ ¿Documentado? <code>CAMBIOS.md</code><br>6️⃣ ¿Entregás? <code>crear_zip_limpio.ps1</code></div>
+</section>
+
+<!-- ========== 9 HIPER-ESPECÍFICO ========== -->
+<section class="seccion" id="hiper">
+<h2>9. 🔬 Nivel cirujano: "cambia el color del botón X del Home" (y cualquier caso)</h2>
+<p>Acá no hay vaguedades. Te digo <b>el archivo, el número de línea aproximado, el nombre del composable, el método y el color exacto</b>. Cualquiera puede seguirlo sin buscar.</p>
+
+<h3>CASO REAL: "Cambia el color de los botones del Home"</h3>
+<div class="viaje">
+ <div class="parada" data-i="0">📝 Pedido</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🔍 Localizar en HomeScreen.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">🎨 Elegir ámbito</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">✏️ Editar colorScheme o copy</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">� glassTokens reacciona</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">👆 Vos lo ves</div>
+</div>
+<button class="accion" onclick="contar3('colorHome')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle3-colorHome"><b>Elegí una parada o dale a ▶</b></div>
+
+<h3>Mapa quirúrgico del HOME SCREEN (archivo: Presentation/home/HomeScreen.kt)</h3>
+<table>
+<tr><th>Lo que ves en pantalla</th><th>Composable real (línea)</th><th>Método / parámetro</th><th>Color que usa</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Saludo "Hola, Mauricio"</td><td><code>HomeScreen</code> (128, 133)</td><td><code>Text(...)</code></td><td><code>onSurface</code> / <code>primary</code></td><td>Muestra/controla: Saludo "Hola, Mauricio" HomeScreen (128, 133) Text(...) onSurface...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Botón "Personalizar Temas & Estilo"</td><td><code>HomeScreen</code> (167)</td><td><code>HabitiaChip(label=...)</code></td><td>tema (primary)</td><td>Muestra/controla: Botón "Personalizar Temas & Estilo" HomeScreen (167) HabitiaChip(...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Botón "Mis Tareas & Prioridades"</td><td><code>HomeScreen</code> (177)</td><td><code>HabitiaChip(label=...)</code></td><td>tema (primary)</td><td>Muestra/controla: Botón "Mis Tareas & Prioridades" HomeScreen (177) HabitiaChip(lab...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Botón "Cerrar Sesión" (rojo)</td><td><code>HomeScreen</code> (188)</td><td><code>Text(color=colorScheme.error)</code></td><td><code>error</code> ← cambiar acá</td><td>Muestra/controla: Botón "Cerrar Sesión" (rojo) HomeScreen (188) Text(color=colorSch...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Tarjeta del día</td><td><code>DayHeroCard</code> (567→583)</td><td><code>HabitiaGlassCard</code></td><td><code>surface.copy(alpha=0.95f)</code></td><td>Muestra/controla: Tarjeta del día DayHeroCard (567→583) HabitiaGlassCard surface.co...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Chips de fecha</td><td><code>DateChip</code> (712)</td><td><code>selected → primary.copy(alpha=0.12f)</code></td><td><code>primary</code></td><td>Muestra/controla: Chips de fecha DateChip (712) selected → primary.copy(alpha=0.12f...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Toggle rápido (Sí/No)</td><td><code>QuickToggleCard</code> (746) → <code>YesNoSegment</code> (801)</td><td><code>onClick</code></td><td><code>primary.copy(alpha=0.15f)</code></td><td>Muestra/controla: Toggle rápido (Sí/No) QuickToggleCard (746) → YesNoSegment (801) ...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Fila de tareas prioritarias</td><td><code>PriorityTaskRow</code> (824)</td><td><code>viewModel.completeTask(id)</code></td><td><code>primary</code> / <code>onPrimaryContainer</code></td><td>Muestra/controla: Fila de tareas prioritarias PriorityTaskRow (824) viewModel.compl...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Tarjeta de recordatorio</td><td><code>HomeScreen</code> (298→340)</td><td><code>IconButton(onClick = viewModel.completeReminder)</code></td><td><code>onSurfaceVariant</code></td><td>Muestra/controla: Tarjeta de recordatorio HomeScreen (298→340) IconButton(onClick =...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>"Consejos para hoy"</td><td><code>TipCard</code> (973) ← <code>tipsForToday()</code> (962)</td><td><code>tonalIndex</code></td><td><code>surfaceVariant.copy(alpha=0.35f)</code></td><td>Muestra/controla: "Consejos para hoy" TipCard (973) ← tipsForToday() (962) tonalInd...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Tarjeta de rituales</td><td><code>HabitiaGlassCard</code> (407) + <code>RitualCard</code> (1011)</td><td><code>onToggle</code></td><td><code>primary</code> / <code>onSurface</code></td><td>Muestra/controla: Tarjeta de rituales HabitiaGlassCard (407) + RitualCard (1011) on...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botón "Crear ritual"</td><td><code>OutlinedButton</code> (465)</td><td><code>onClick → showCreateRitual=true</code></td><td>borde del tema</td><td>Muestra/controla: Botón "Crear ritual" OutlinedButton (465) onClick → showCreateRit...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Botón "Guía paso a paso"</td><td><code>Button</code> (473)</td><td><code>onClick → showRitualWizard</code></td><td><code>primary</code></td><td>Muestra/controla: Botón "Guía paso a paso" Button (473) onClick → showRitualWizard ...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Diálogo "Nuevo ritual"</td><td><code>AlertDialog</code> (490→518)</td><td><code>viewModel/createRitual</code></td><td><code>surface.copy(alpha=0.95f)</code></td><td>Muestra/controla: Diálogo "Nuevo ritual" AlertDialog (490→518) viewModel/createRitu...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Encabezados de sección</td><td><code>SectionHeader</code> (1057)</td><td><code>title=</code></td><td><code>onSurface</code></td><td>Muestra/controla: Encabezados de sección SectionHeader (1057) title= onSurface...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+</table>
+
+<h3>¿Dónde se cambia un color, según el alcance?</h3>
+<div class="card"><b>1. Cambiar UN botón puntual</b><br>En el Screen: buscás la línea y cambiás <code>color = MaterialTheme.colorScheme.error</code> por el que quieras (ej. <code>primary</code>). Solo afecta ese sitio.</div>
+<div class="card azul"><b>2. Cambiar TODOS los botones primarios de la app</b><br>Andá a <code>Core/theme/Color.kt</code> → <code>Primary</code> en el ColorScheme. Todos los <code>colorScheme.primary</code> cambian a la vez.</div>
+<div class="card morado"><b>3. Cambiar el vidrio (tintes del glass)</b><br><code>Core/theme/Glass.kt → glassTokens()</code>. Ahí están <code>containerAlpha</code>, <code>tintColor</code>, <code>strokeColor</code>, <code>specularAlpha</code>. El <code>HazeStyle</code> lo consume automáticamente.</div>
+<div class="card oro"><b>4. Cambiar la paleta que eligió el usuario</b><br><code>Presentation/UserMenu/CustomPaletteCreator.kt</code> (valores HEX por defecto) o <code>AppearanceScreen.kt</code> → <code>viewModel.onApplyGeneratedPalette(...)</code> → <code>UpdateThemeUseCase</code> → DataStore.</div>
+
+<h3>Cómo encontrar cualquier cosa en CUALQUIER pantalla (método universal)</h3>
+<div class="codebox">
+<span class="hi">PASO 1</span> → Buscá el texto que ves en pantalla. Ejemplo: "Cerrar Sesión"
+<span class="hi">   cmd:</span> Get-ChildItem '...\Presentation' -Recurse -Filter '*.kt' |
+         Select-String -Pattern 'Cerrar Sesión'
+
+<span class="hi">PASO 2</span> → El resultado te da ARCHIVO + LÍNEA. Ahí está el composable.
+
+<span class="hi">PASO 3</span> → Mirá arriba: ¿quién lo llama? Ese es su padre (ej. HomeScreen → DayHeroCard).
+
+<span class="hi">PASO 4</span> → Mirá el parámetro: ¿viene de un ViewModel?
+         viewModel.completeTask() / viewModel.toggleHabit() / viewModel.onApplyGeneratedPalette()
+
+<span class="hi">PASO 5</span> → Si es dato: ViewModel → UseCase → Interface (Domain) → Impl (Data) → DTO → Ktor → Backend.
+
+<span class="hi">PASO 6</span> → Si es color/tamaño: Core/theme o Core/config → reacción automática.
+
+<span class="hi">PASO 7</span> → Cambiás, compilás, probás, documentás en CAMBIOS.md.
+</div>
+
+<h3>Mapa por pantalla: composables, métodos y a dónde conectan</h3>
+<table>
+<tr><th>Screen</th><th>Composables / funciones clave</th><th>Métodos del ViewModel</th><th>Conexión</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>HomeScreen</td><td>DayHeroCard, DateChip, QuickToggleCard, YesNoSegment, PriorityTaskRow, TipCard, RitualCard, SectionHeader</td><td>toggleHabit, completeTask, completeReminder, createRitual</td><td>/Tasks, /Habits, /HabitCompletions, /Reminders</td><td>Muestra/controla: HomeScreen DayHeroCard, DateChip, QuickToggleCard, YesNoSegment, ...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>TaskScreen</td><td>TaskScreen + TaskRowItem + categorías HabitiaChip</td><td>changeCategory, addNewTask, completeTask, updateTask</td><td>/Tasks, /Catalogs/categories</td><td>Muestra/controla: TaskScreen TaskScreen + TaskRowItem + categorías HabitiaChip chan...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>EisenhowerScreen</td><td>QuadrantDrop, ColumnCard, drag overlay</td><td>moveTaskInMatrix, updateTask</td><td>PUT /Tasks</td><td>Muestra/controla: EisenhowerScreen QuadrantDrop, ColumnCard, drag overlay moveTaskI...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>FoodScreen</td><td>MealEditorDialog, MealCard, ShoppingItemRow, catálogo colapsable</td><td>addMeal, updateMeal, addShoppingItem, addCatalogIngredient, toggleShoppingItem</td><td>/Meals, /MealIngredients, /ShoppingLists, /Catalogs</td><td>Muestra/controla: FoodScreen MealEditorDialog, MealCard, ShoppingItemRow, catálogo ...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>PlannerScreen</td><td>vista semana + eventos</td><td>PlannerViewModel.addEvent/deleteEvent</td><td>/CalendarEvents</td><td>Muestra/controla: PlannerScreen vista semana + eventos PlannerViewModel.addEvent/de...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>RemindersScreen</td><td>lista de alertas + checkbox</td><td>completeReminder</td><td>/Reminders</td><td>Muestra/controla: RemindersScreen lista de alertas + checkbox completeReminder /Rem...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>DiaryScreen</td><td>libro, páginas por fecha</td><td>DiaryViewModel.refresh/addEntry/updateEntry/deleteEntry</td><td>/DiaryEntries</td><td>Muestra/controla: DiaryScreen libro, páginas por fecha DiaryViewModel.refresh/addEn...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>HaabiScreen</td><td>ChatSession, LazyColumn mensajes, input, persona chips</td><td>ApiClient.haabiChat → HaabiActionsImpl</td><td>Gemini + TODOS</td><td>Muestra/controla: HaabiScreen ChatSession, LazyColumn mensajes, input, persona chip...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>UserMenuScreen</td><td>formulario perfil</td><td>updateUserProfile</td><td>/Users/{id}</td><td>Muestra/controla: UserMenuScreen formulario perfil updateUserProfile /Users/{id}...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>AppearanceScreen</td><td>paletas, fuentes, modo oscuro, CustomPaletteCreator</td><td>onPaletteSelected, onFontSelected, onDarkModeToggled, onApplyGeneratedPalette</td><td>DataStore (UpdateThemeUseCase)</td><td>Muestra/controla: AppearanceScreen paletas, fuentes, modo oscuro, CustomPaletteCrea...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>FocusScreen</td><td>timer Pomodoro local</td><td>FocusViewModel</td><td>local</td><td>Muestra/controla: FocusScreen timer Pomodoro local FocusViewModel local...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/home/HomeScreen.kt / Core/theme/Color.kt / Core/config/UiConfig.kt</code>.</td></tr>
+</table>
+
+<div class="card verde"><b>Regla final para cualquiera del equipo</b><br>Si te piden un cambio: <b>buscás el texto → encontrás el composable → identificás si es dato (VM→UseCase→Repo→Backend) o visual (Core/theme o Core/config) → editás → compilás → probás → documentás.</b> Con los mapas de arriba, nunca más tenés que preguntar "¿dónde está?".
+</section>
+
+
+<h3>🎯 Galería de CASOS REALES de todos los módulos (hiper-específicos)</h3>
+<p>Elegí el caso y dale a <b>▶ Contar la historia</b>. Cada uno dice <b>archivo, composable, línea aproximada, método exacto y color/ruta</b>. Es el nivel más detallado de la guía.</p>
+
+<div class="tabs" id="tabsCasos">
+ <button class="act" data-caso="home_color">🏠 Color botón Home</button>
+ <button data-caso="home_size">📏 Tamaño isla/Haabi</button>
+ <button data-caso="task_cat">✅ Categoría Tareas</button>
+ <button data-caso="eisen_color">🎯 Color matriz</button>
+ <button data-caso="food_cat">🍽️ Catálogo Comidas</button>
+ <button data-caso="food_tuto">▶ Tutorial MealCard</button>
+ <button data-caso="diary_font">📖 Fuente Diario</button>
+ <button data-caso="planner_day">📅 Día Planner</button>
+ <button data-caso="reminder_row">🔔 Fila Recordatorio</button>
+ <button data-caso="haabi_chat">🐾 Chat Haabi</button>
+<h3>🗺️ Mapas quirúrgicos de TODOS los módulos (igual que el del Home)</h3>
+<p>Cada tabla: <b>lo que ves → composable real (línea) → método → color/ruta</b>. Hacé clic en un módulo para desplegar su mapa.</p>
+<div class="tabs" id="tabsMapas">
+ <button class="act" data-mapa="task">✅ Tareas</button>
+ <button data-mapa="eisen">🎯 Eisenhower</button>
+ <button data-mapa="food">🍽️ Comidas</button>
+ <button data-mapa="planner">📅 Planner</button>
+ <button data-mapa="reminders">🔔 Alertas</button>
+ <button data-mapa="diary">📖 Diario</button>
+ <button data-mapa="haabi">🐾 Haabi</button>
+ <button data-mapa="profile">👤 Perfil</button>
+ <button data-mapa="appearance">🎨 Apariencia</button>
+ <button data-mapa="focus">⏱️ Focus</button>
+ <button data-mapa="more">⋯ Más</button>
+ <button data-mapa="login">🔐 Login/Register</button>
+</div>
+ <button data-caso="profile_field">👤 Campo Perfil</button>
+ <button data-caso="appearance">🎨 Apariencia</button>
+</div>
+
+<div id="caso-home_color" class="proceso act">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 Pedido</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">🔍 Select-String</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 HomeScreen:188</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">🎨 Editar color</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">👆 Ver en Home</div>
+</div>
+<button class="accion" onclick="contar4('home_color')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-home_color"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-home_size" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Más pequeña"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 UiConfig.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 BottonNavigation</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 HaabiCompanion</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🔄 Recomposición</div>
+</div>
+<button class="accion" onclick="contar4('home_size')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-home_size"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-task_cat" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Nueva categoría"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 TaskScreen:122</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 TaskViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 ApiTaskCategoryRepo</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🌐 /Catalogs/categories</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🔄 Chip aparece</div>
+</div>
+<button class="accion" onclick="contar4('task_cat')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-task_cat"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-eisen_color" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Color de cuadrante"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 EisenhowerScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 QuadrantDrop</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 classify(task,hoy)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 moveTaskInMatrix</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 PUT /Tasks</div>
+</div>
+<button class="accion" onclick="contar4('eisen_color')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-eisen_color"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-food_cat" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Categorizar ingrediente"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 FoodCategory.kt</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 MealEditorDialog</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 FoodViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🌐 /Catalogs/ingredients</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🔄 Sección colapsable</div>
+</div>
+<button class="accion" onclick="contar4('food_cat')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-food_cat"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-food_tuto" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Botón Tutorial"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 MealCard()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 youtubeUrl ?: query</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 LocalUriHandler</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🌐 Abre YouTube</div>
+</div>
+<button class="accion" onclick="contar4('food_tuto')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-food_tuto"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-diary_font" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Fuente del diario"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 DiaryScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 FontFamily.Serif</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 todayLabel()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 DiaryViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 /DiaryEntries</div>
+</div>
+<button class="accion" onclick="contar4('diary_font')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-diary_font"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-planner_day" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Grid del calendario"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 PlannerScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 daysInMonth()/isLeapYear</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 leadingBlanks()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 Posit()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 /CalendarEvents</div>
+</div>
+<button class="accion" onclick="contar4('planner_day')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-planner_day"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-reminder_row" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Fila de alerta"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 RemindersScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 ReminderRowItem()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 RemindersViewModel</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">🌐 /Reminders</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🔔 Alertas + Home</div>
+</div>
+<button class="accion" onclick="contar4('reminder_row')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-reminder_row"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-haabi_chat" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambiar el chat"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 HaabiScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 HaabiMsg + ChatSession</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 CircularProgressIndicatorPlaceholder</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 ApiClient.haabiChat</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">📢 EventBus → UI</div>
+</div>
+<button class="accion" onclick="contar4('haabi_chat')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-haabi_chat"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-profile_field" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Agregar campo perfil"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 UserUpdateDto (back)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 User.java</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 UserResponseDto (front)</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 UserMenuScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">🌐 PUT /Users/{id}</div>
+</div>
+<button class="accion" onclick="contar4('profile_field')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-profile_field"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+<div id="caso-appearance" class="proceso">
+<div class="viaje">
+ <div class="parada" data-i="0">📝 "Cambiar paleta HEX"</div><div class="flecha">➜</div>
+ <div class="parada" data-i="1">📄 CustomPaletteCreator</div><div class="flecha">➜</div>
+ <div class="parada" data-i="2">📄 isValidHexColor()</div><div class="flecha">➜</div>
+ <div class="parada" data-i="3">📄 AppearanceScreen</div><div class="flecha">➜</div>
+ <div class="parada" data-i="4">📄 UpdateThemeUseCase</div><div class="flecha">➜</div>
+ <div class="parada" data-i="5">💾 DataStore → tema</div>
+</div>
+<button class="accion" onclick="contar4('appearance')">▶ Contar la historia</button><button class="accion alt" onclick="parar()">⏹ Parar</button>
+<div class="detalle" id="detalle4-appearance"><b>Elegí una parada o dale a ▶</b></div>
+</div>
+
+
+
+<div id="mapa-task" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/tasks/TaskScreen.kt</code> · <code>TaskViewModel.kt</code> · <code>TaskiInterfaceState.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Pestañas Lista/Matriz/Sprint</td><td><code>HabitiaChip</code> (~87)</td><td><code>viewMode = vista</code></td><td>tema primary</td><td>Muestra/controla: Pestañas Lista/Matriz/Sprint HabitiaChip (~87) viewMode = vista t...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Categorías Hogar/Compras/Alimentación</td><td><code>HabitiaChip</code> (~133)</td><td><code>viewModel.changeCategory(cat)</code></td><td><code>primary</code></td><td>Muestra/controla: Categorías Hogar/Compras/Alimentación HabitiaChip (~133) viewMode...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/tasks/TaskScreen.kt / Core/components/HabitiaChip.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>+ Categoría / − activa</td><td><code>HabitiaChip</code> (~147, 154)</td><td><code>addCategory / deleteCategory</code></td><td>/Catalogs/categories</td><td>Muestra/controla: + Categoría / − activa HabitiaChip (~147, 154) addCategory / dele...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/tasks/TaskScreen.kt / Core/components/HabitiaChip.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Fila de tarea</td><td><code>TaskRowItem()</code></td><td><code>completeTask(id)</code></td><td><code>onSurfaceVariant</code></td><td>Muestra/controla: Fila de tarea TaskRowItem() completeTask(id) onSurfaceVariant...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/TaskScreen.kt / Core/components/HabitiaChip.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Botón Crear</td><td><code>TextButton</code> (~290)</td><td><code>addNewTask()</code></td><td><code>primary</code> (~301)</td><td>Muestra/controla: Botón Crear TextButton (~290) addNewTask() primary (~301)...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/TaskScreen.kt / Core/components/HabitiaChip.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Diálogo nueva tarea</td><td><code>AlertDialog</code></td><td>título, desc, prioridad</td><td><code>surface.copy(0.95f)</code></td><td>Muestra/controla: Diálogo nueva tarea AlertDialog título, desc, prioridad surface.c...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/TaskScreen.kt / Core/components/HabitiaChip.kt / Core/theme/Color.kt</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-eisen" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/tasks/EisenhowerScreen.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Matriz 2x2</td><td><code>EisenhowerMatrix()</code></td><td>clasifica con <code>classify(task, hoy)</code></td><td>glass de Glass.kt</td><td>Muestra/controla: Matriz 2x2 EisenhowerMatrix() clasifica con classify(task, hoy) g...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/EisenhowerScreen.kt / Core/theme/Glass.kt</code>.</td></tr>
+<tr><td>Zona de soltar</td><td><code>QuadrantDrop()</code></td><td>drag & drop overlay</td><td>tinte hazeState</td><td>Muestra/controla: Zona de soltar QuadrantDrop() drag & drop overlay tinte hazeState...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/EisenhowerScreen.kt / Core/theme/Glass.kt</code>.</td></tr>
+<tr><td>Chip de tarea</td><td><code>TaskChip()</code></td><td><code>moveTaskInMatrix()</code></td><td>prioridad → color</td><td>Muestra/controla: Chip de tarea TaskChip() moveTaskInMatrix() prioridad → color...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/EisenhowerScreen.kt / Core/theme/Glass.kt</code>.</td></tr>
+<tr><td>Tablero Kanban</td><td><code>SprintBoard()</code> + <code>ColumnCard()</code></td><td><code>updateTask()</code></td><td><code>surfaceVariant</code></td><td>Muestra/controla: Tablero Kanban SprintBoard() + ColumnCard() updateTask() surfaceV...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/tasks/EisenhowerScreen.kt / Core/theme/Glass.kt</code>.</td></tr>
+<tr><td>+ Columna</td><td><code>TextButton</code> (~492)</td><td><code>showAddColumn = true</code></td><td>/Tasks PUT</td><td>Muestra/controla: + Columna TextButton (~492) showAddColumn = true /Tasks PUT...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-food" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/food/FoodScreen.kt</code> · <code>FoodViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Menú / Lista de Compra</td><td><code>HabitiaChip</code> (~125, 137)</td><td><code>currentSubTab</code></td><td>primary</td><td>Muestra/controla: Menú / Lista de Compra HabitiaChip (~125, 137) currentSubTab prim...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Por día / Por alimento</td><td><code>FilterChip</code> (~189,190)</td><td><code>shoppingView</code></td><td>FoodCategory</td><td>Muestra/controla: Por día / Por alimento FilterChip (~189,190) shoppingView FoodCat...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/food/FoodScreen.kt / Domain/model/FoodCategory.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Header de día</td><td><code>Text("Fecha: $dia")</code> (~205)</td><td>groupBy sourceDay</td><td><code>onSurface</code></td><td>Muestra/controla: Header de día Text("Fecha: $dia") (~205) groupBy sourceDay onSurf...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Header de categoría</td><td><code>Text("${cat.emoji} ${cat.label}")</code> (~226)</td><td>groupBy foodCategory</td><td><code>onSurface</code></td><td>Muestra/controla: Header de categoría Text("${cat.emoji} ${cat.label}") (~226) grou...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Tarjeta de comida</td><td><code>MealCard(meal, onEdit, hazeState)</code></td><td><code>openMealEditor(meal)</code></td><td>glass + ▶ Tutorial</td><td>Muestra/controla: Tarjeta de comida MealCard(meal, onEdit, hazeState) openMealEdito...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/food/FoodScreen.kt / Domain/model/FoodCategory.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Fila de compra</td><td><code>ShoppingItemRow(item, onToggle)</code></td><td><code>toggleShoppingItem(id)</code></td><td>PUT item</td><td>Muestra/controla: Fila de compra ShoppingItemRow(item, onToggle) toggleShoppingItem...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Editor de comida</td><td><code>MealEditorDialog</code></td><td><code>addMeal/updateMeal</code></td><td>/Meals + /MealIngredients</td><td>Muestra/controla: Editor de comida MealEditorDialog addMeal/updateMeal /Meals + /Me...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Catálogo colapsable</td><td>secciones <code>FoodCategory.ordered</code></td><td><code>addCatalogIngredient()</code></td><td>/Catalogs/ingredients</td><td>Muestra/controla: Catálogo colapsable secciones FoodCategory.ordered addCatalogIngr...</td><td>Categorias: <code>Domain/model/FoodCategory.kt</code> (label, emoji, order). Archivo: <code>Presentation/food/FoodScreen.kt / Domain/model/FoodCategory.kt / Core/theme/Color.kt</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-planner" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/planner/PlannerScreen.kt</code> · <code>PlannerViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Mes anterior / siguiente</td><td><code>IconButton</code> (~133, 142)</td><td><code>viewModel.previousMonth()/nextMonth()</code></td><td>tema</td><td>Muestra/controla: Mes anterior / siguiente IconButton (~133, 142) viewModel.previou...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Grid de días</td><td>funciones puras <code>daysInMonth</code>, <code>isLeapYear</code>, <code>leadingBlanks</code>, <code>addDays</code>, <code>shortDayLabel</code></td><td>cálculo local</td><td>—</td><td>Muestra/controla: Grid de días funciones puras daysInMonth , isLeapYear , leadingBl...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/planner/PlannerScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Evento en celda</td><td><code>Posit(...)</code></td><td><code>viewModel.addEvent()</code></td><td>/CalendarEvents</td><td>Muestra/controla: Evento en celda Posit(...) viewModel.addEvent() /CalendarEvents...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Conectar Google</td><td><code>GoogleConnectCard</code> (~256)</td><td><code>showGoogleConnect</code></td><td>OAuth2 pendiente</td><td>Muestra/controla: Conectar Google GoogleConnectCard (~256) showGoogleConnect OAuth2...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/planner/PlannerScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>+ Evento</td><td><code>FloatingActionButton</code> (~339)</td><td><code>addEvent</code></td><td>POST /CalendarEvents</td><td>Muestra/controla: + Evento FloatingActionButton (~339) addEvent POST /CalendarEvent...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-reminders" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/reminders/RemindersScreen.kt</code> · <code>RemindersViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Lista de alertas</td><td><code>RemindersScreen</code></td><td><code>getReminders()</code></td><td>StateFlow</td><td>Muestra/controla: Lista de alertas RemindersScreen getReminders() StateFlow...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Fila de alerta</td><td><code>ReminderRowItem(...)</code></td><td><code>completeReminder(id)</code></td><td>/Reminders</td><td>Muestra/controla: Fila de alerta ReminderRowItem(...) completeReminder(id) /Reminde...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botón Crear</td><td><code>TextButton</code> (~183)</td><td><code>addReminder()</code></td><td><code>primary</code> (~195)</td><td>Muestra/controla: Botón Crear TextButton (~183) addReminder() primary (~195)...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/reminders/RemindersScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Diálogo nueva alerta</td><td><code>AlertDialog</code></td><td>título + fecha/hora</td><td><code>surface.copy(0.95f)</code></td><td>Muestra/controla: Diálogo nueva alerta AlertDialog título + fecha/hora surface.copy...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-diary" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/more/DiaryScreen.kt</code> · <code>DiaryViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Flecha volver</td><td><code>IconButton(onBack)</code> (~102)</td><td><code>onBack()</code></td><td>tema</td><td>Muestra/controla: Flecha volver IconButton(onBack) (~102) onBack() tema...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/DiaryScreen.kt / Core/theme/Typography.kt</code>.</td></tr>
+<tr><td>Portada del libro</td><td><code>Button("Abrir Diario")</code> (~152)</td><td><code>opened = true</code></td><td>glass</td><td>Muestra/controla: Portada del libro Button("Abrir Diario") (~152) opened = true gla...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/DiaryScreen.kt / Core/theme/Typography.kt</code>.</td></tr>
+<tr><td>Página del diario</td><td><code>TextField</code> con <code>FontFamily.Serif</code></td><td><code>onValueChange</code></td><td>book dark-aware</td><td>Muestra/controla: Página del diario TextField con FontFamily.Serif onValueChange bo...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Fecha de página</td><td><code>todayLabel()</code></td><td>SimpleDateFormat "d 'de' MMMM, yyyy"</td><td>es_ES</td><td>Muestra/controla: Fecha de página todayLabel() SimpleDateFormat "d 'de' MMMM, yyyy"...</td><td>Forma: parametro <code>shape=</code> (RoundedCornerShape). Vidrio: <code>Glass.kt - glassTokens()</code>.</td></tr>
+<tr><td>Escritura persistida</td><td>botón guardar (~268)</td><td><code>DiaryViewModel.addEntry/updateEntry</code></td><td>/DiaryEntries</td><td>Muestra/controla: Escritura persistida botón guardar (~268) DiaryViewModel.addEntry...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-haabi" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/more/HaabiScreen.kt</code> · <code>Core/components/HaabiCompanion.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Mascota en header</td><td><code>AnimatedMascot(60.dp)</code></td><td>animación respiración</td><td>assets PNG</td><td>Muestra/controla: Mascota en header AnimatedMascot(60.dp) animación respiración ass...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/HaabiScreen.kt / Core/components/HaabiCompanion.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Chips de conversaciones</td><td><code>Surface</code> por <code>ChatSession</code> (~125)</td><td><code>activeId = s.id</code></td><td>primaryContainer</td><td>Muestra/controla: Chips de conversaciones Surface por ChatSession (~125) activeId =...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/HaabiScreen.kt / Core/components/HaabiCompanion.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>+ nueva conversación</td><td><code>IconButton</code> (~133)</td><td><code>newChat()</code></td><td>Add icon</td><td>Muestra/controla: + nueva conversación IconButton (~133) newChat() Add icon...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/HaabiScreen.kt / Core/components/HaabiCompanion.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Selector de trato</td><td><code>Text("Trato:")</code> (~142) + chips (~147)</td><td><code>persona = p</code></td><td>onSurfaceVariant</td><td>Muestra/controla: Selector de trato Text("Trato:") (~142) + chips (~147) persona = ...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+<tr><td>Burbuja de mensaje</td><td><code>Box + Text</code></td><td><code>HaabiMsg</code></td><td>primaryContainer / surfaceVariant</td><td>Muestra/controla: Burbuja de mensaje Box + Text HaabiMsg primaryContainer / surface...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botón "Ir a X"</td><td><code>TextButton</code> (~200)</td><td><code>onNavigate(m.route)</code></td><td>ruta routeToScreen</td><td>Muestra/controla: Botón "Ir a X" TextButton (~200) onNavigate(m.route) ruta routeTo...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/HaabiScreen.kt / Core/components/HaabiCompanion.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Spinner "pensando"</td><td><code>CircularProgressIndicatorPlaceholder</code></td><td><code>loading</code></td><td>primary</td><td>Muestra/controla: Spinner "pensando" CircularProgressIndicatorPlaceholder loading p...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/more/HaabiScreen.kt / Core/components/HaabiCompanion.kt / Core/config/UiConfig.kt</code>.</td></tr>
+<tr><td>Botón Enviar</td><td><code>Button("Enviar")</code> (~246, 272)</td><td><code>ApiClient.haabiChat</code></td><td>Gemini + EventBus</td><td>Muestra/controla: Botón Enviar Button("Enviar") (~246, 272) ApiClient.haabiChat Gem...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-profile" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/UserMenu/UserMenuScreen.kt</code> · <code>UserMenuViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Título "Mi Perfil"</td><td><code>Text</code> (~137)</td><td>—</td><td><code>onSurface</code></td><td>Muestra/controla: Título "Mi Perfil" Text (~137) — onSurface...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/UserMenuScreen.kt / Data/remote/dto/AuthDto.kt</code>.</td></tr>
+<tr><td>Flecha volver</td><td><code>IconButton</code> (~139)</td><td><code>onBack()</code></td><td>tema</td><td>Muestra/controla: Flecha volver IconButton (~139) onBack() tema...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/UserMenuScreen.kt / Data/remote/dto/AuthDto.kt</code>.</td></tr>
+<tr><td>Campos nombre/cumple/teléfono</td><td>formulario prellenado</td><td><code>updateUserProfile()</code></td><td><code>surfaceVariant</code></td><td>Muestra/controla: Campos nombre/cumple/teléfono formulario prellenado updateUserPro...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botón guardar</td><td><code>HabitiaButton</code> (~254)</td><td><code>userApi.updateProfile()</code></td><td>PUT /Users/{id}</td><td>Muestra/controla: Botón guardar HabitiaButton (~254) userApi.updateProfile() PUT /U...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botones secundarios</td><td><code>OutlinedButton</code> (~278, 299)</td><td>opciones</td><td>outline</td><td>Muestra/controla: Botones secundarios OutlinedButton (~278, 299) opciones outline...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/UserMenuScreen.kt / Data/remote/dto/AuthDto.kt</code>.</td></tr>
+<tr><td>Cerrar sesión</td><td><code>AlertDialog</code> (~330)</td><td><code>session.clear()</code></td><td><code>error</code></td><td>Muestra/controla: Cerrar sesión AlertDialog (~330) session.clear() error...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/UserMenuScreen.kt / Data/remote/dto/AuthDto.kt</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-appearance" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/UserMenu/AppearanceScreen.kt</code> · <code>CustomPaletteCreator.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Título "Personalizar Apariencia"</td><td><code>Text</code> (~112)</td><td>—</td><td><code>onSurface</code></td><td>Muestra/controla: Título "Personalizar Apariencia" Text (~112) — onSurface...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/AppearanceScreen.kt / CustomPaletteCreator.kt / Core/theme/</code>.</td></tr>
+<tr><td>Paletas / fuentes / oscuro</td><td>secciones</td><td><code>onPaletteSelected / onFontSelected / onDarkModeToggled</code></td><td>DataStore</td><td>Muestra/controla: Paletas / fuentes / oscuro secciones onPaletteSelected / onFontSe...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Crea tu Paleta (HEX)</td><td><code>CustomPaletteCreator</code></td><td><code>isValidHexColor()</code> + <code>createCustomPalette()</code></td><td>5 campos HEX</td><td>Muestra/controla: Crea tu Paleta (HEX) CustomPaletteCreator isValidHexColor() + cre...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/AppearanceScreen.kt / CustomPaletteCreator.kt / Core/theme/</code>.</td></tr>
+<tr><td>Generar otra paleta</td><td><code>OutlinedButton</code> (~249)</td><td><code>onApplyGeneratedPalette</code></td><td>UpdateThemeUseCase</td><td>Muestra/controla: Generar otra paleta OutlinedButton (~249) onApplyGeneratedPalette...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/UserMenu/AppearanceScreen.kt / CustomPaletteCreator.kt / Core/theme/</code>.</td></tr>
+<tr><td>Aplicar / guardar</td><td><code>Button</code> (~266) + <code>OutlinedButton</code> (~280)</td><td><code>onSaveGeneratedPalette</code></td><td>DataStore</td><td>Muestra/controla: Aplicar / guardar Button (~266) + OutlinedButton (~280) onSaveGen...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-focus" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/focus/FocusScreen.kt</code> · <code>FocusViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Selector de modo</td><td><code>HabitiaChip</code> (~76)</td><td>estado local</td><td>primary</td><td>Muestra/controla: Selector de modo HabitiaChip (~76) estado local primary...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/focus/FocusScreen.kt / Core/components/HabitiaButton.kt</code>.</td></tr>
+<tr><td>Botones iniciar/detener</td><td><code>HabitiaButton</code> (~140, 164)</td><td><code>FocusViewModel</code></td><td>timer local (sin backend)</td><td>Muestra/controla: Botones iniciar/detener HabitiaButton (~140, 164) FocusViewModel ...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Anillo animado</td><td>progreso circular</td><td>corrutina local</td><td>primary</td><td>Muestra/controla: Anillo animado progreso circular corrutina local primary...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/focus/FocusScreen.kt / Core/components/HabitiaButton.kt</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-more" class="proceso">
+<p><b>Archivo:</b> <code>Presentation/more/MoreScreen.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Tarjetas de acceso</td><td>card glass</td><td><code>onOpenDiary / onOpenHaabi</code></td><td>HabitiaScreen.Diary / Haabi</td><td>Muestra/controla: Tarjetas de acceso card glass onOpenDiary / onOpenHaabi HabitiaSc...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Encabezado</td><td><code>Text("Más")</code> (~301)</td><td>—</td><td><code>onBackground</code></td><td>Muestra/controla: Encabezado Text("Más") (~301) — onBackground...</td><td>Tipografia: <code>MaterialTheme.typography.*</code> o <code>fontSize</code> en el <code>Text</code>. Color: <code>color=</code>.</td></tr>
+</table>
+</div>
+
+<div id="mapa-login" class="proceso">
+<p><b>Archivos:</b> <code>Presentation/auth/LoginScreen.kt</code> · <code>RegisterScreen.kt</code> · <code>AuthViewModel.kt</code></p>
+<table>
+<tr><th>Lo que ves</th><th>Composable (línea)</th><th>Método</th><th>Color / ruta</th><th>Para que sirve / Que hace</th><th>Como cambiar color, tamano, forma, tipografia...</th></tr>
+<tr><td>Correo</td><td><code>label "Correo Electrónico"</code> (~127)</td><td><code>email</code></td><td>outline</td><td>Muestra/controla: Correo label "Correo Electrónico" (~127) email outline...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/auth/LoginScreen.kt / RegisterScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Contraseña</td><td><code>label "Contraseña"</code> (~148, 150)</td><td><code>passwordVisible</code></td><td>IconButton (~153)</td><td>Muestra/controla: Contraseña label "Contraseña" (~148, 150) passwordVisible IconBut...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/auth/LoginScreen.kt / RegisterScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Botón Ingresar</td><td><code>HabitiaButton</code> (~186)</td><td><code>viewModel.login()</code></td><td>POST /auth/login</td><td>Muestra/controla: Botón Ingresar HabitiaButton (~186) viewModel.login() POST /auth/...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Nombre completo (Register)</td><td><code>label</code> (~120)</td><td><code>name</code></td><td>outline</td><td>Muestra/controla: Nombre completo (Register) label (~120) name outline...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/auth/LoginScreen.kt / RegisterScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+<tr><td>Fecha nacimiento</td><td><code>placeholder "AAAA-MM-DD"</code> (~172)</td><td><code>birthDate</code></td><td>POST /auth/register</td><td>Muestra/controla: Fecha nacimiento placeholder "AAAA-MM-DD" (~172) birthDate POST /...</td><td>Backend: endpoint en <code>Data/remote/api/ApiClient.kt</code>, service en <code>modules/&lt;mod&gt;/application/service/</code>, DTO en <code>application/dto/</code>.</td></tr>
+<tr><td>Botón Registrar</td><td><code>HabitiaButton</code> (~190)</td><td><code>viewModel.register()</code></td><td>BCrypt + JWT</td><td>Muestra/controla: Botón Registrar HabitiaButton (~190) viewModel.register() BCrypt ...</td><td>Color: <code>Core/theme/Color.kt</code> (ColorScheme) o <code>color=</code> del composable. Archivo: <code>Presentation/auth/LoginScreen.kt / RegisterScreen.kt / Core/theme/Color.kt</code>.</td></tr>
+</table>
+</div>
+
+<div class="pie">HABITIA · Guía definitiva generada desde el código real · 41 cortes · Noviembre 2026</div>
+</main>
+
+<script>
+/* ============================================================
+   HABITIA — Guía Definitiva · JavaScript unificado y a prueba de errores
+   ============================================================ */
+(function(){
+  'use strict';
+
+  /* ---------- 1. NAVEGACIÓN PRINCIPAL (pestañas superiores) ---------- */
+  var navButtons = document.querySelectorAll('nav button');
+  navButtons.forEach(function(b){
+    b.addEventListener('click', function(){
+      navButtons.forEach(function(x){ x.classList.remove('act'); });
+      document.querySelectorAll('.seccion').forEach(function(x){ x.classList.remove('act'); });
+      b.classList.add('act');
+      var sec = document.getElementById(b.getAttribute('data-s'));
+      if (sec) sec.classList.add('act');
+      window.scrollTo({top:0, behavior:'smooth'});
+      detenerTodo();
+    });
+  });
+
+  /* ---------- 2. TABS DE PROCESOS (apartado 1) ---------- */
+  var tabsProc = document.querySelectorAll('#tabsProcesos button');
+  tabsProc.forEach(function(b){
+    b.addEventListener('click', function(){
+      tabsProc.forEach(function(x){ x.classList.remove('act'); });
+      document.querySelectorAll('#flujos .proceso').forEach(function(x){ x.classList.remove('act'); });
+      b.classList.add('act');
+      var p = document.getElementById('proceso-' + b.getAttribute('data-p'));
+      if (p) p.classList.add('act');
+      detenerTodo();
+    });
+  });
+
+  /* ---------- 3. TABS DE CAMBIOS (apartado 8) ---------- */
+  var tabsCamb = document.querySelectorAll('#tabsCambios button');
+  tabsCamb.forEach(function(b){
+    b.addEventListener('click', function(){
+      tabsCamb.forEach(function(x){ x.classList.remove('act'); });
+      document.querySelectorAll('#cambios .proceso').forEach(function(x){ x.classList.remove('act'); });
+      b.classList.add('act');
+      var p = document.getElementById('cambio-' + b.getAttribute('data-c'));
+      if (p) p.classList.add('act');
+      detenerTodo();
+    });
+  });
+
+  /* ---------- 3b. TABS DEL APARTADO 9: SIEMPRE REEMPLAZA, NUNCA SUMA ---------- */
+  function mostrarSolo(strId, grupoTabs){
+    document.querySelectorAll('#hiper .proceso').forEach(function(x){ x.classList.remove('act'); });
+    if (grupoTabs) grupoTabs.forEach(function(x){ x.classList.remove('act'); });
+    var el = document.getElementById(strId);
+    if (el) el.classList.add('act');
+    detenerTodo();
+  }
+
+  var tabsCasos = document.querySelectorAll('#tabsCasos button');
+  tabsCasos.forEach(function(b){
+    b.addEventListener('click', function(){
+      mostrarSolo('caso-' + b.getAttribute('data-caso'), tabsCasos);
+      b.classList.add('act');
+    });
+  });
+
+  var tabsMapas = document.querySelectorAll('#tabsMapas button');
+  tabsMapas.forEach(function(b){
+    b.addEventListener('click', function(){
+      mostrarSolo('mapa-' + b.getAttribute('data-mapa'), tabsMapas);
+      b.classList.add('act');
+    });
+  });
+  /* ---------- 4. TABS DE DIAGRAMAS (apartado 3) ---------- */
+  var tabsDiag = document.querySelectorAll('#diagramas .tabs button');
+  tabsDiag.forEach(function(b){
+    b.addEventListener('click', function(){
+      tabsDiag.forEach(function(x){ x.classList.remove('act'); });
+      b.classList.add('act');
+      var front = document.getElementById('diag-front');
+      var back  = document.getElementById('diag-back');
+      if (front) front.style.display = (b.getAttribute('data-d') === 'front') ? 'block' : 'none';
+      if (back)  back.style.display  = (b.getAttribute('data-d') === 'back')  ? 'block' : 'none';
+    });
+  });
+
+  /* ---------- 5. HISTORIAS ---------- */
+  var historias = {
+    tarea:[
+      '👆 <b>Vos tocás "Crear"</b> en TaskScreen. Es lo único que hacés; después la app trabaja sola.',
+      '🎨 <b>TaskScreen</b> llama a <code>viewModel.addNewTask(titulo, desc, prioridad)</code>. La pantalla no sabe nada de HTTP.',
+      '🧠 <b>TasksViewModel</b> lanza una corrutina y llama al repositorio con <code>_currentCategory.value</code>.',
+      '📜 <b>UseCase</b>: acá se llama directo al repo. Para LEER sí existe <code>GetTodayTasksUseCase()</code> → <code>repository.getTodayTasks()</code>.',
+      '🔌 <b>TaskRepository.addTask(task)</b>: contrato puro de Domain. No dice cómo se guarda.',
+      '📦 <b>ApiTaskRepositoryImpl</b> convierte tu Task en <code>TaskCreateDto</code> y guarda categoría/hora en su mapa local.',
+      '🔄 <b>TaskMapper</b> traduce el <code>TaskResponseDto</code> que vuelve en <code>Task(id="task-42")</code>.',
+      '🌐 <b>Ktor / ApiClient</b>: POST /Tasks con Bearer. ApiClient resuelve la IP automáticamente.',
+      '⚙️ <b>Backend</b>: JwtAuthenticationFilter valida → TaskController → TaskServiceImpl → Task.java → TaskRepository JPA → INSERT en MySQL.',
+      '📢 <b>EventBus</b>: si lo creó Haabi, emite evento; App.kt refresca y cambia la pestaña a la categoría correcta.',
+      '🔄 <b>StateFlow</b> → Compose repinta → <b>vos ves la tarea sin recargar</b>. ✅'],
+    habito:[
+      '👆 <b>Tocás el check</b> de un ritual en el Home.',
+      '🎨 <b>RitualCard</b> llama a <code>onToggle → viewModel.toggleHabit(id)</code>.',
+      '🧠 <b>HomeViewModel.toggleHabit</b> busca el hábito en uiState y decide el nuevo estado (opuesto al actual).',
+      '🔌 <b>HabitRepository.completeHabit(id, completed)</b>: contrato de Domain.',
+      '📦 <b>ApiHabitRepositoryImpl</b> construye un <code>HabitCompletionRequestDto(habitId, date=hoy, completed)</code>.',
+      '🌐 <b>POST /HabitCompletions</b> con Bearer token.',
+      '⚙️ <b>Backend</b>: HabitCompletionController → Service → guarda en <code>Habit_complet</code>.',
+      '🔄 <b>refresh()</b> recarga completions y <code>computeStreak()</code> recalcula la racha (días consecutivos hasta hoy).',
+      '🔥 <b>StateFlow</b> actualiza Home → el contador de racha cambia solo.'],
+    comida:[
+      '👆 <b>Guardás una comida</b> desde el editor de FoodScreen.',
+      '🎨 <b>FoodScreen</b> arma un <code>Meal</code> con nombre, tipo, fecha, ingredientes y youtubeQuery.',
+      '🧠 <b>FoodViewModel.addMeal(meal)</b> lanza la corrutina.',
+      '🔌 <b>MealRepository.addMeal()</b>: interfaz de Domain.',
+      '📦 <b>ApiMealRepositoryImpl</b> crea <code>MealsCreateDto</code> y llama POST /Meals.',
+      '🌐 <b>POST /Meals</b> → el backend devuelve el id real (ej. 103).',
+      '📎 Después <b>POST /MealIngredients</b> por cada ingrediente (con el mealId real). Así sobreviven al reinicio.',
+      '⚙️ <b>Backend</b>: MealsController + MealIngredientController → JPA → tablas Meals y Meal_Ingredients.',
+      '🔄 <b>cache.update</b> → StateFlow → FoodScreen muestra la comida agrupada por tipo con su botón ▶ Tutorial.'],
+    compra:[
+      '👆 <b>Agregás un ingrediente</b> en la pestaña Compras.',
+      '🎨 <b>FoodScreen</b> toma nombre, cantidad y categoría (FoodCategory).',
+      '🧠 <b>FoodViewModel.addShoppingItem()</b> pasa también día y tipo de comida.',
+      '🔌 <b>ShoppingRepository.addItem()</b> con sus 6 parámetros.',
+      '📦 <b>ShoppingItemCreateDto</b> lleva description, itemDate, sourceMealType y sourceMealName.',
+      '🌐 <b>POST /ShoppingLists/{id}/items</b>. Si no hay lista, <code>ensureShoppingList()</code> la crea con /generate.',
+      '⚙️ <b>InterpreteDeIngredientes</b> separa "50g" → cantidad 50 y unidad G; si no hay cantidad, asume 1 UNIT.',
+      '🗄️ Se guarda en <code>Shopping_Items</code> con día y comida de origen.',
+      '🔄 La UI lo muestra en <b>Por día</b> (Desayuno/Almuerzo/Cena) o <b>Por alimento</b> (categorías con emoji).'],
+    recordatorio:[
+      '👆 <b>Creás una alerta</b> en RemindersScreen.',
+      '🎨 La pantalla junta título, fecha y hora.',
+      '🧠 <b>RemindersViewModel</b> llama a <code>repository.addReminder()</code>.',
+      '🔌 <b>ReminderRepository.addReminder()</b>: contrato.',
+      '📦 <b>ApiReminderRepositoryImpl</b> usa <code>joinDateTime(date, time)</code> → "2026-11-23T09:00".',
+      '🌐 <b>POST /Reminders</b> con userId del JWT en el body.',
+      '⚙️ <b>Backend</b> guarda en Reminders con su RepeatType.',
+      '🔔 <b>getUpcomingReminder()</b> ordena por fecha+hora y el Home muestra la próxima alerta.'],
+    diario:[
+      '👆 <b>Escribís</b> en tu diario.',
+      '🎨 <b>DiaryScreen</b> (estilo libro, Serif) toma el texto.',
+      '🧠 <b>DiaryViewModel</b> llama a <code>repo.addEntry(hoy, texto)</code>.',
+      '🔌 <b>DiaryRepository.addEntry()</b>: devuelve la entrada creada o null.',
+      '📦 <b>DiaryEntryCreateDto(entryDate, text)</b>.',
+      '🌐 <b>POST /DiaryEntries</b> → GET /DiaryEntries y /date/{date}.',
+      '🗄️ <b>Backend</b> guarda userId + entryDate + text (hasta 4000 chars).',
+      '🔄 <b>entries StateFlow</b> → el libro se actualiza con tu nueva página.'],
+    login:[
+      '👆 <b>Ponés correo y clave</b> en LoginScreen.',
+      '🎨 La pantalla valida y llama a <code>authViewModel.login(email, password)</code>.',
+      '🧠 <b>AuthViewModel</b> llama a <code>authRepository.login()</code>.',
+      '🔌 <b>AuthRepository.login()</b> devuelve <code>Result&lt;Unit&gt;</code>.',
+      '📦 <b>LoginRequestDto(email, password)</b> → POST /auth/login.',
+      '🌐 <b>Backend</b>: BCrypt verifica la clave y <code>JwtService</code> firma un HS256 con 24 h de validez.',
+      '👤 Después <b>GET /Users/email/{email}</b> resuelve tu userId numérico.',
+      '💾 <b>SessionManager.onLogin + onUserResolved</b> guarda token, email, id, nombre y cumple en DataStore.',
+      '🏠 <b>App.kt</b> observa que la sesión está lista y te manda al Home.'],
+    tema:[
+      '👆 <b>Elegís una paleta</b> en AppearanceScreen (o creás una HEX).',
+      '🎨 La pantalla llama al ViewModel correspondiente.',
+      '🧠 <b>UserMenuViewModel</b> → <code>updateThemeUseCase.updatePalette(...)</code>.',
+      '📜 <b>UpdateThemeUseCase</b>: updatePalette, updateFont, updateDarkMode, updateGeneratedPalette, updateSavedPalettes.',
+      '🔌 <b>UserPreferencesRepository</b>: interfaz de preferencias.',
+      '💾 <b>DataStoreUserPreferencesRepositoryImpl</b> guarda en DataStore (NO va al backend).',
+      '🎨 <b>glassTokens()</b> reacciona al cambio de color y recalcula alfa del vidrio.',
+      '🪟 <b>Todo el vidrio de la app cambia</b> sin recargar.'],
+    haabi:[
+      '💬 <b>Vos escribís</b> "armame el menú de hoy y la lista de compras".',
+      '🎨 <b>HaabiScreen</b> agrega el mensaje y llama a <code>ApiClient.haabiChat(msg, actions, history, persona)</code>.',
+      '🌐 <b>Gemini 2.5-flash</b> recibe prompt + historial + 7 herramientas.',
+      '🎯 Devuelve un <b>functionCall</b>: <code>crear_plan_semanal_comidas(plan)</code>.',
+      '⚙️ <b>executeHaabiAction()</b> → <code>HaabiActionsImpl.createWeeklyMenuPlan()</code> parsea el plan.',
+      '📦 Por cada comida: <code>mealRepo.addMeal()</code> + ingredientes; por cada ingrediente: <code>shoppingRepo.addItem()</code> con día y comida; crea la tarea "Compra semanal" y agenda evento + recordatorio.',
+      '🌐 Todos esos repos hacen POST al backend → MySQL.',
+      '📢 <b>HaabiEventBus.emit("food", "Compras", ...)</b>.',
+      '🔔 <b>App.kt</b> refresca, cambia de pestaña y muestra notificación en la bandeja.',
+      '🔄 <b>StateFlow</b> → ves Comidas agrupadas, Lista por día/alimento y Tareas → Compras. ¡TODO solo! 🎉']
+  };
+
+  var cambiosHistorias = {
+    tamano:[
+      '📝 <b>Te piden "más pequeño"</b>. Preguntás: ¿isla, mascota o botón? La respuesta decide el archivo.',
+      '🗺️ <b>Si es global</b>: <code>Core/config/UiConfig.kt</code> → <code>IslandConfig.height</code>, <code>HaabiConfig.mascotSize</code>, <code>bottomOffset</code>. Ahí están TODOS los números con comentarios.',
+      '🎨 <b>El componente los lee</b>: <code>HaabiBottonNavigation.kt</code> usa <code>.height(IslandConfig.height)</code>; <code>HaabiCompanion.kt</code> usa <code>HaabiConfig.mascotSize</code>. No tocás el componente.',
+      '🔄 <b>Compose recompone</b>: al recargar la app se aplica el nuevo tamaño en todas partes a la vez.',
+      '👆 <b>Vos lo ves</b> en el teléfono. Probás con <code>assembleDebug</code>.'],
+    color:[
+      '📝 <b>Te piden cambiar el rosado</b>. Definís si es color de marca, de vidrio o de un botón puntual.',
+      '🎨 <b>Marca</b>: <code>Core/theme/Color.kt</code> y <code>Theme.kt</code> (ColorScheme).',
+      '🪟 <b>Vidrio</b>: <code>glassTokens()</code> en Glass.kt calcula containerAlpha, tintColor, strokeColor, specularAlpha. El HazeStyle lo consume.',
+      '🧱 <b>Se propaga</b> a los 16 componentes de <code>Core/components/</code> porque todos consultan el tema.',
+      '🔄 <b>Toda la app cambia junta</b> sin tocar cada pantalla: por eso existe el tema centralizado.'],
+    mover:[
+      '📝 <b>Te piden mover algo</b>. Primero ubicás en qué Screen vive.',
+      '🖥️ <b>Dentro de la pantalla</b>: <code>Modifier.align(Alignment.X)</code>, <code>padding(...)</code> o <code>offset</code>. Regla: contenedores y alineaciones, NO X/Y manuales salvo animación.',
+      '📐 <b>Ejemplo Haabi</b>: en <code>HaabiCompanion.kt</code> el offset lo controla el dedo con <code>detectDragGestures</code> y se guarda en <code>mascotOffset</code>.',
+      '🧭 <b>Si es global</b>: se mueve en <code>App.kt</code> con <code>Alignment.BottomCenter</code> y <code>zIndex</code>.',
+      '👆 <b>Probás</b> en emulador y teléfono sin tapar botones ni la barra.'],
+    endpoint:[
+      '📝 <b>Te piden un endpoint nuevo</b>. Empezás por el backend.',
+      '⚙️ <b>Backend</b>: método en <code>modules/&lt;mod&gt;/infrastructure/Controller/&lt;X&gt;Controller.java</code> con <code>@GetMapping/@PostMapping</code> + servicio en <code>application/service/&lt;X&gt;ServiceImpl.java</code>.',
+      '📦 <b>DTOs</b> Request/Response en <code>application/dto/</code> del módulo.',
+      '📱 <b>Frontend</b>: DTO en <code>Data/remote/dto/</code> y mapper en <code>Data/remote/mapper/</code>.',
+      '🔌 <b>Contrato + Impl</b>: método en <code>Domain/repository/</code> e implementación en <code>Data/repository/Api*RepositoryImpl.kt</code>.',
+      '🧠 <b>UI</b>: el ViewModel lo llama y el Screen muestra el StateFlow. Koin ya entrega el repo.',
+      '✅ <b>Probás</b> con la colección de Postman (68 requests) y en la app.'],
+    prompt:[
+      '📝 <b>Te piden "Haabi debe…"</b>. El comportamiento vive en un solo lugar.',
+      '🌐 <b>Abrís</b> <code>Data/remote/api/ApiClient.kt</code> y buscás <code>buildString</code> en <code>haabiChat()</code>: ahí está el <code>systemText</code>.',
+      '🧰 <b>Acción nueva</b>: herramienta en <code>haabiTools()</code> + caso en <code>executeHaabiAction()</code>.',
+      '⚙️ <b>Implementás</b> en <code>Presentation/more/HaabiActionsImpl.kt</code> con repos reales (guarda en MySQL).',
+      '📢 <b>Si avisa a la UI</b>: <code>HaabiEventBus.emit(route, category, description)</code> y App.kt hace el resto.',
+      '🤖 <b>Probás</b> escribiéndole en HaabiScreen (~2 s de latencia).'],
+    regla:[
+      '📝 <b>Te piden cambiar una regla</b> (streak, categoría de tarea…).',
+      '📜 <b>Regla de presentación</b>: <code>Domain/usecase/</code>. Ej. <code>GetTodayTasksUseCase.invoke()</code>.',
+      '⚙️ <b>Regla de negocio</b>: backend <code>modules/&lt;mod&gt;/application/service/&lt;X&gt;ServiceImpl.java</code> (@Transactional).',
+      '🔌 <b>Lo bueno</b>: el contrato NO cambia. No tocás ni ViewModel ni Controller.',
+      '🔄 <b>Se propaga</b> solo: el StateFlow actualiza la pantalla.'],
+    bd:[
+      '📝 <b>Te piden agregar un campo</b> (como teléfono del perfil).',
+      '🗄️ <b>Backend</b>: campo en <code>modules/&lt;mod&gt;/domain/model/&lt;X&gt;.java</code> con anotación JPA.',
+      '📦 <b>DTOs</b> Request y Response del módulo.',
+      '🔄 <b>ddl-auto=update</b> crea la columna sola al arrancar.',
+      '📱 <b>Frontend</b>: campo en <code>Domain/model/</code>, DTO en <code>Data/remote/dto/</code> y mapper.',
+      '🔄 <b>Screen</b>: mostrás el campo y listo.'],
+    pantalla:[
+      '📝 <b>Te piden una sección nueva</b>. El orden importa.',
+      '🧭 <b>1. Ruta</b>: objeto en <code>Core/navigation/HabitiaScreen.kt</code> (+ tab en BottomTabs.kt).',
+      '🎨 <b>2. Pantalla</b>: <code>Presentation/&lt;mod&gt;/&lt;X&gt;Screen.kt</code> con Box/Column y componentes de Core.',
+      '🧠 <b>3. ViewModel</b>: <code>&lt;X&gt;ViewModel.kt</code> con StateFlow, registrado como <code>factory</code> en <code>di/Modules.kt</code>.',
+      '🔌 <b>4. Datos</b>: usás repos existentes (Koin los entrega).',
+      '🧭 <b>5. Wiring</b>: en <code>App.kt</code> agregás el <code>when → &lt;X&gt;Screen(viewModel)</code> dentro del Crossfade.',
+      '✅ <b>6. Probás</b>: compilás y navegás.'],
+    notif:[
+      '📝 <b>Te piden cambiar la alerta</b> (hora, texto, canal).',
+      '📱 <b>Texto/canal</b>: <code>Data/notification/AndroidLocalNotificationPlatform.kt</code> (buildNotification + createNotificationChannel) y el ID en <code>SettingProvider</code>.',
+      '🔔 <b>Disparo</b>: en <code>App.kt</code> el collector de <code>HaabiEventBus</code> llama a <code>notifier.showAlert(...)</code>.',
+      '⚙️ <b>La hora</b>: viene del backend en <code>HaabiActionsImpl.scheduleForTask()</code> (09:00). Cambiás ahí el Reminder y CalendarEvent.',
+      '🔕 <b>Permiso</b>: Android 13+, se pide en MainActivity con <code>requestNotifications</code>.',
+      '✅ <b>Probás</b>: creás tarea con Haabi y mirás la bandeja.'],
+    texto:[
+      '📝 <b>Te piden cambiar un texto</b> ("Consejos para hoy" → otro).',
+      '🖥️ <b>Buscás</b> el literal en el Screen con Select-String. Ej. <code>HomeScreen.kt</code>.',
+      '📝 <b>Editás</b> el string dentro del <code>Text("...")</code>.',
+      '🔄 <b>Compose recompone</b> automáticamente: no hay que refrescar.',
+      '👆 <b>Vos lo ves</b> al instante. Si aparece en varias pantallas, buscá todas las ocurrencias.']
+  };
+
+  var hiperHistorias = {
+    colorHome:[
+      '📝 <b>Te piden "cambia el color del botón Cerrar Sesión del Home"</b>. No adivines: buscás el texto exacto.',
+      '🔍 <b>Buscás</b> <code>Get-ChildItem "...\\Presentation" -Recurse -Filter *.kt | Select-String "Cerrar Sesión"</code>. Te da <code>HomeScreen.kt</code>, línea ~188.',
+      '🎨 <b>Elegís ámbito</b>: ¿solo ese botón o todos los de error? Si es puntual, editás <code>Text(color = MaterialTheme.colorScheme.error)</code> por <code>primary</code>. Si es global, vas a Color.kt → error.',
+      '✏️ <b>Editás</b> el color. Si es tarjeta glass, <code>glassTokens()</code> se encarga del tinte automáticamente.',
+      '🔄 <b>Reacción</b>: Compose recompone. Si cambiaste Color.kt, TODA la app cambia junta.',
+      '👆 <b>Probás</b> con <code>.\\gradlew assembleDebug</code> y escribís en CAMBIOS.md: "cambié color de X porque…".']
+  };
+
+  /* ---------- 5b. CASOS REALES (apartado 9) ---------- */
+  var casosReales = {
+    home_color:[
+      '📝 <b>Te piden cambiar el color de "Cerrar Sesión"</b> en el Home. No adivines: buscás el texto.',
+      '🔍 <code>Get-ChildItem "...\\Presentation" -Recurse -Filter *.kt | Select-String "Cerrar Sesión"</code> → <code>HomeScreen.kt</code>, línea <b>~188</b>.',
+      '📄 <b>Composable</b>: <code>HomeScreen</code> (línea 46). El elemento es <code>Text("Cerrar Sesión", color = MaterialTheme.colorScheme.error)</code>.',
+      '🎨 <b>Editás</b> ahí mismo <code>color = MaterialTheme.colorScheme.primary</code> si es puntual; o <code>Color.kt → error</code> si es global.',
+      '👆 <b>Probás</b> con <code>assembleDebug</code>: el Home muestra el nuevo color.']
+    ,home_size:[
+      '📝 <b>Te piden "isla y mascota más pequeñas"</b>. Ningún número está en el componente: todos en <code>Core/config/UiConfig.kt</code>.',
+      '📄 <b>UiConfig.kt</b>: <code>IslandConfig.height</code> (64→52), <code>HaabiConfig.mascotSize</code> (110→90), <code>IslandConfig.sideMargin</code>, <code>HaabiConfig.bottomOffset</code>.',
+      '📄 <b>HabitiaBottonNavigation.kt</b> lee <code>.height(IslandConfig.height)</code>. No lo tocás; solo el config.',
+      '📄 <b>HaabiCompanion.kt</b> lee <code>HaabiConfig.mascotSize</code> y <code>bottomOffset</code>, con arrastre por <code>detectDragGestures</code>.',
+      '🔄 <b>Recomposición</b>: al recompilar, todos los tamaños cambian a la vez. Documentás en CAMBIOS.md.']
+    ,task_cat:[
+      '📝 <b>Te piden agregar categoría "Trabajo"</b> en Tareas.',
+      '📄 <b>TaskScreen.kt (~122)</b>: el <code>categories.forEach { cat -> HabitiaChip(...) }</code> ya es dinámico, viene del ViewModel. No hay que hardcodear.',
+      '🧠 <b>TasksViewModel.addCategory(name)</b> → llama a <code>TaskCategoryRepository.add()</code>.',
+      '📦 <b>ApiTaskCategoryRepository</b> hace POST /Catalogs/categories con <code>{"name":"Trabajo"}</code>.',
+      '🌐 <b>CatalogController</b> guarda en <code>Task_Categories</code> y devuelve la lista; el StateFlow emite y aparece el chip nuevo.']
+    ,eisen_color:[
+      '📝 <b>Te piden cambiar el color de un cuadrante de la matriz</b>.',
+      '📄 <b>EisenhowerScreen.kt</b>: composables <code>EisenhowerMatrix</code>, <code>QuadrantDrop</code>, <code>TaskChip</code>, <code>ColumnCard</code>.',
+      '📄 <b>classify(task, hoy)</b> decide el cuadrante Q1/Q2/Q3/Q4 según prioridad y fecha.',
+      '📄 El color del cuadrante sale del <code>HazeStyle</code> de <code>habitiaGlass(hazeState)</code>: cambiás el tinte en <code>Glass.kt → glassTokens()</code> o el alpha en ese llamado.',
+      '🌐 Al arrastrar, <code>viewModel.moveTaskInMatrix(task, quadrant)</code> → <code>updateTask()</code> → <b>PUT /Tasks</b> persiste el cambio.']
+    ,food_cat:[
+      '📝 <b>Te piden agregar la categoría "Frutas Secas" al catálogo</b>.',
+      '📄 <b>FoodCategory.kt</b>: enum con label, emoji y order. Ahí se define cada categoría (Frutas 🍎, Verduras 🥬…).',
+      '📄 <b>MealEditorDialog</b> en FoodScreen: secciones colapsables por <code>FoodCategory.ordered</code> con chip <code>+ nuevo</code>.',
+      '🧠 <b>FoodViewModel.addCatalogIngredient(name, category, unit)</b> → <code>IngredientCatalogRepository.add()</code>.',
+      '🌐 <b>ApiIngredientCatalogRepository</b> → POST /Catalogs/ingredients → tabla <code>Catalog_Ingredients</code> (48 items sembrados).',
+      '🔄 El StateFlow <code>catalogByCategory</code> recompone y la nueva sección aparece.']
+    ,food_tuto:[
+      '📝 <b>Te piden cambiar el botón ▶ Tutorial</b>.',
+      '📄 <b>FoodScreen.kt → MealCard(meal, onEdit, hazeState)</b>: ahí está el botón.',
+      '📄 Lógica: <code>val tutorialUrl = meal.youtubeUrl ?: meal.youtubeQuery?.let { "https://www.youtube.com/results?search_query=${it.replace(" ","+")}" }</code>.',
+      '📄 Si no hay URL ni query, el botón va deshabilitado. Para abrirlo: <code>LocalUriHandler.current.openUri(tutorialUrl)</code>.',
+      '🌐 La URL se guarda en <code>HaabiActionsImpl</code> al crear la comida y viaja en <code>Meal.youtubeUrl</code> desde el backend.']
+    ,diary_font:[
+      '📝 <b>Te piden cambiar la tipografía del diario</b>.',
+      '📄 <b>DiaryScreen.kt</b>: el TextField usa <code>FontFamily.Serif</code> (estilo libro). Cambiás ahí por otra fuente.',
+      '📄 <code>todayLabel()</code> genera la fecha de la página con SimpleDateFormat ("d de MMMM, yyyy", locale es).',
+      '🧠 <b>DiaryViewModel</b> expone <code>entries: StateFlow</code> y llama a <code>refresh()</code>, <code>addEntry()</code>, <code>updateEntry()</code>, <code>deleteEntry()</code>.',
+      '🌐 <b>ApiDiaryRepositoryImpl</b> → /DiaryEntries → tabla <code>DiaryEntries</code> (userId + entryDate + text).']
+    ,planner_day:[
+      '📝 <b>Te piden cambiar el grid del calendario</b>.',
+      '📄 <b>PlannerScreen.kt</b> tiene las funciones puras: <code>daysInMonth(year,month)</code>, <code>isLeapYear(year)</code>, <code>leadingBlanks(year,month)</code>, <code>addDays(iso,n)</code>, <code>shortDayLabel(iso)</code>.',
+      '📄 <code>Posit(...)</code> dibuja cada evento en la celda; <code>GoogleConnectCard</code> es el acceso a integración.',
+      '🧠 <b>PlannerViewModel</b> usa <code>CalendarEventRepository</code> (getEvents, addEvent, updateEvent, deleteEvent, refresh).',
+      '🌐 Endpoint: <b>/CalendarEvents</b> y <b>/CalendarEvents/user/{userId}/between</b>. Raíz: tabla Calendar_Events.']
+    ,reminder_row:[
+      '📝 <b>Te piden cambiar el estilo de una alerta</b>.',
+      '📄 <b>RemindersScreen.kt</b> → composable <code>ReminderRowItem(...)</code>: ahí están el checkbox, el texto y el color.',
+      '🧠 <b>RemindersViewModel.completeReminder(id)</b> → <code>ReminderRepository.completeReminder()</code>.',
+      '📦 <b>ApiReminderRepositoryImpl</b> convierte fecha+hora con <code>joinDateTime()</code> y usa <code>ReminderCreateDto</code>.',
+      '🌐 <b>/Reminders</b> y <code>/Reminders/user/{userId}/between</code>. Las alertas también alimentan el Home (<code>getUpcomingReminder()</code>).']
+    ,haabi_chat:[
+      '📝 <b>Te piden cambiar algo del chat</b> (burbuja, spinner, multi-chat).',
+      '📄 <b>HaabiScreen.kt</b>: <code>HaabiScreen(onBack, onNavigate, actions)</code>, mensajes en <code>HaabiMsg</code>, sesiones en <code>ChatSession</code>, spinner en <code>CircularProgressIndicatorPlaceholder</code>.',
+      '📄 El envío llama a <code>ApiClient.haabiChat(msg, actions, history, persona)</code>; Gemini responde functionCall.',
+      '📄 <b>ApiClient.kt</b>: <code>systemText</code> (prompt), <code>haabiTools()</code> (7 herramientas), <code>executeHaabiAction()</code>.',
+      '📢 <b>HaabiActionsImpl</b> usa repos reales y emite <code>HaabiEventBus</code> → App.kt refresca y notifica.']
+    ,profile_field:[
+      '📝 <b>Te piden agregar un campo al perfil</b> (ej. teléfono, ya se hizo).',
+      '⚙️ <b>Backend</b>: campo en <code>User.java</code> + <code>UserUpdateDto</code> + <code>UserResponseDto</code> (módulo user).',
+      '📱 <b>Front</b>: campo en <code>UserResponseDto.kt</code> (Data/remote/dto/AuthDto.kt) y en el modelo de sesión.',
+      '📄 <b>UserMenuScreen.kt</b>: formulario prellenado con el nombre real del JWT.',
+      '🧠 <b>UserMenuViewModel.updateUserProfile()</b> → <code>UserRepository.updateProfile()</code> → <code>ApiUserRepositoryImpl</code>.',
+      '🌐 <b>PUT /Users/{id}</b> → tabla Users. El saludo del Home se actualiza porque la sesión es un StateFlow.']
+    ,appearance:[
+      '📝 <b>Te piden cambiar el creador de paletas HEX</b>.',
+      '📄 <b>CustomPaletteCreator.kt</b>: función <code>isValidHexColor()</code> valida los 5 campos; <code>createCustomPalette()</code> arma la paleta.',
+      '📄 <b>AppearanceScreen.kt</b> lo llama y pasa <code>viewModel.onApplyGeneratedPalette(it)</code>.',
+      '🧠 <b>UserMenuViewModel</b> → <code>UpdateThemeUseCase</code> (updatePalette, updateFont, updateDarkMode, updateGeneratedPalette, updateSavedPalettes).',
+      '💾 <b>DataStoreUserPreferencesRepositoryImpl</b> guarda en DataStore. No va al backend: el tema es local y sobrevive al cierre.']
+  };
+  /* ---------- 6. MOTOR DE REPRODUCTORES ---------- */
+  var timer = null;
+
+  function detenerTodo(){
+    if (timer !== null){ clearInterval(timer); timer = null; }
+  }
+
+  function pintar(raiz, pasos, i, idDetalle){
+    var paradas = raiz.querySelectorAll('.parada');
+    paradas.forEach(function(p){ p.classList.toggle('act', Number(p.getAttribute('data-i')) === i); });
+    var d = document.getElementById(idDetalle);
+    if (d) d.innerHTML = '<div class="paso-titulo">Paso ' + (i+1) + '</div>' + pasos[i];
+  }
+
+  // Reproductor de flujos (apartado 1)
+  window.contar = function(proceso){
+    detenerTodo();
+    var raiz = document.getElementById('proceso-' + proceso);
+    var pasos = historias[proceso];
+    if (!raiz || !pasos) return;
+    var i = 0;
+    pintar(raiz, pasos, i, 'detalle-' + proceso);
+    timer = setInterval(function(){
+      i++;
+      if (i >= pasos.length){ detenerTodo(); return; }
+      pintar(raiz, pasos, i, 'detalle-' + proceso);
+    }, 1600);
+    raiz.querySelectorAll('.parada').forEach(function(p){
+      p.addEventListener('click', function(){
+        detenerTodo();
+        pintar(raiz, pasos, Number(p.getAttribute('data-i')), 'detalle-' + proceso);
+      });
+    });
+  };
+
+  // Reproductor de cambios (apartado 8)
+  window.contar2 = function(clave){
+    detenerTodo();
+    var raiz = document.getElementById('cambio-' + clave);
+    var pasos = cambiosHistorias[clave];
+    if (!raiz || !pasos) return;
+    var i = 0;
+    pintar(raiz, pasos, i, 'detalle2-' + clave);
+    timer = setInterval(function(){
+      i++;
+      if (i >= pasos.length){ detenerTodo(); return; }
+      pintar(raiz, pasos, i, 'detalle2-' + clave);
+    }, 1700);
+    raiz.querySelectorAll('.parada').forEach(function(p){
+      p.addEventListener('click', function(){
+        detenerTodo();
+        pintar(raiz, pasos, Number(p.getAttribute('data-i')), 'detalle2-' + clave);
+      });
+    });
+  };
+
+  // Reproductor hiper-específico (apartado 9)
+  window.contar3 = function(){
+    detenerTodo();
+    var raiz = document.querySelector('#hiper .proceso.act');
+    var pasos = hiperHistorias.colorHome;
+    if (!raiz || !pasos) return;
+    var i = 0;
+    pintar(raiz, pasos, i, 'detalle3-colorHome');
+    timer = setInterval(function(){
+      i++;
+      if (i >= pasos.length){ detenerTodo(); return; }
+      pintar(raiz, pasos, i, 'detalle3-colorHome');
+    }, 1700);
+    raiz.querySelectorAll('.parada').forEach(function(p){
+      p.addEventListener('click', function(){
+        detenerTodo();
+        pintar(raiz, pasos, Number(p.getAttribute('data-i')), 'detalle3-colorHome');
+      });
+    });
+  };
+
+  /* Reproductor de CASOS REALES (apartado 9 - galería) */
+  window.contar4 = function(clave){
+    detenerTodo();
+    var raiz = document.getElementById('caso-' + clave);
+    var pasos = casosReales[clave];
+    if (!raiz || !pasos) return;
+    var i = 0;
+    pintar(raiz, pasos, i, 'detalle4-' + clave);
+    timer = setInterval(function(){
+      i++;
+      if (i >= pasos.length){ detenerTodo(); return; }
+      pintar(raiz, pasos, i, 'detalle4-' + clave);
+    }, 1800);
+    raiz.querySelectorAll('.parada').forEach(function(p){
+      p.addEventListener('click', function(){
+        detenerTodo();
+        pintar(raiz, pasos, Number(p.getAttribute('data-i')), 'detalle4-' + clave);
+      });
+    });
+  };
+  window.parar = detenerTodo;
+
+  /* ---------- 7. ARRANQUE ---------- */
+  document.addEventListener('DOMContentLoaded', function(){
+    var first = document.querySelector('.seccion');
+    if (first) first.classList.add('act');
+    // apartado 9: un solo proceso activo al arrancar (nunca apilados)
+    var casos = document.querySelectorAll('#hiper .proceso');
+    casos.forEach(function(x,i){ if (i > 0) x.classList.remove('act'); });
+    var bc = document.querySelector('#tabsCasos button');
+    var bm = document.querySelector('#tabsMapas button');
+    if (bm) bm.classList.remove('act');
+    if (bc) bc.classList.add('act');
+  });
+})();
+</script>
+
+</body>
+</html>
